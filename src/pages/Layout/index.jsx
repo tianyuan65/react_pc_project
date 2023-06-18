@@ -2,7 +2,10 @@ import React from 'react'
 import { Breadcrumb,Layout, Menu, theme } from 'antd'
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
 // import './index.scss'
-import {Link,useLocation} from 'react-router-dom'
+// import {NavLink} from 'react-router-dom'
+// import {widthUseNavigate} from '../../utils/index'
+import { useNavigate } from 'react-router-dom';
+import Home from '../Home';
 
 const { Header, Content, Sider } = Layout;
 
@@ -11,32 +14,69 @@ const items1 = ['1', '2', '3'].map((key) => ({
   label: `nav ${key}`,
 }));
 
-// const subnav=['数据概览','内容管理','发布文章']
-const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, index) => {
-  const key = String(index + 1);
-  return {
-    key: `sub${key}`,
-    icon: React.createElement(icon),
-    label: `subnav ${key}`,
-    children: new Array(4).fill(null).map((_, j) => {
-      const subKey = index * 4 + j + 1;
-      return {
-        key: subKey,
-        label: `option${subKey}`,
-      };
-    }),
-  };
-});
+const subnav=['数据概览','内容管理','发布文章']
+// const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, index) => {
+//   const subKey = String(index + 1);
+//   return {
+//     key: `sub${subKey}`,
+//     icon: React.createElement(icon),
+//     label: `${subnav[index]}`,
+//     children: new Array(4).fill(null).map((_, j) => {
+//       const subKey = index * 4 + j + 1;
+//       return {
+//         key: subKey,
+//         label: `option${subKey}`,
+//       };
+//     }),
+//     // 点击子菜单标题
+//     onTitleClick:()=>showCompon()
+//   };
+// });
+
+const items3=[
+  {
+    key:'/home',
+    icon:React.createElement(UserOutlined),
+    label:`数据概览`
+  },
+  {
+    key:'/article',
+    icon:React.createElement(LaptopOutlined),
+    label:`内容管理`
+  },
+  {
+    key:'/publish',
+    icon:React.createElement(NotificationOutlined),
+    label:`发布文章`
+  }
+]
+
+// showCompon函数，点击导航选项后触发此函数，文本高亮，路由跳转到点击的组件，在展示区展示对应组件内容
+// const showCompon=()=>{
+//   // 遍历subnav，将三个文本渲染到页面当中
+//   subnav.forEach((item)=>{
+//     console.log('subnav',`${item}`);
+//     // 路由跳转到对应的路由
+//     // this.props.history.push('/article');
+//     //在展示区渲染点击的子菜单对应的组件
+//     <Navigate to='/home' element={<Home/>}/>
+//   })
+// }
 
 export default function GeekLayout() {
+  const navigate=useNavigate()
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
-  const location=useLocation()
-  const selectedKey=location.pathname
-  console.log('被选择的选项是',selectedKey);
-  
+  const click=(e)=>{
+    console.log('clickEvent',e);
+    navigate(e.key,{
+      replace:false,
+      
+    });
+  }
+
   return (
     <div>
       <Layout>
@@ -59,24 +99,23 @@ export default function GeekLayout() {
             <Menu
               mode="inline"
               defaultSelectedKeys={['1']}
-              defaultOpenKeys={['sub1']}
-              selectedKeys={[selectedKey]}
+              // defaultOpenKeys={['sub1']}
               style={{
                 height: '100%',
                 borderRight: 0,
               }}
-              items={items2}
+              items={items3}
+              onClick={click}
             >
-              <Menu.Item icon={<UserOutlined/>} key="">
-                <Link to="/">数据概览</Link>
+              {/* <Menu.Item icon={<UserOutlined/>} key="/home">
+                <Link to="/home">数据概览</Link>
               </Menu.Item>
               <Menu.Item icon={<LaptopOutlined/>} key="/article">
-              <Link to="/article">内容管理</Link>
-
+                <Link to="/article">内容管理</Link>
               </Menu.Item>
               <Menu.Item icon={<NotificationOutlined/>} key="/publish">
                 <Link to="/publish">发布文章</Link>
-              </Menu.Item>
+              </Menu.Item> */}
             </Menu>
           </Sider>
           <Layout

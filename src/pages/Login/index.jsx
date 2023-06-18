@@ -164,5 +164,5 @@ export default withRouter(
   )
   // 注：在connect中处理后，返回，又作为withRouter的参数被处理(添加了个navigate属性)
   (Login)
-  ) 
+)
 

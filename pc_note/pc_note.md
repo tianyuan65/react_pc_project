@@ -101,11 +101,65 @@
     * 目标：给予redux封装管理用户登录的store
     * 1. 创建loginAction对象和loginAsync对象，第一个的返回值是普通的action对象；第二个的返回值是函数
     * 2. 创建loginReducer组件，初始化登录信息列表，将其列表赋值给preState，并将preState和action作为参数传入。进入函数内部后从action中解构赋值出属性type和data，并创建switch循环，判断条件为type。
-    * 3. 创建store文件，下载并引入redux-thunk、redux-devtools-extension工具，从redux中引入createStore函数和applyMiddleware中间件，用于打包reducers，最后暴露store。
-* 2.7 实现登录逻辑 如何使用redux实现还是个迷。。。。，所以先把mobx的逻辑写下来，等我通透了再说
+    * 3. src下，创建store文件，下载并引入redux-thunk、redux-devtools-extension工具，从redux中引入createStore函数和applyMiddleware中间件，用于打包reducers，最后暴露store。
+* 2.7 实现登录逻辑
     * 目标：在表单校验通过之后通过封装好的store登录接口
     * 1. switch循环中，type值为LOGIN时，进入判断，执行向服务器发送POST请求的函数，要添加的属性名为mobile(手机号)和code(验证码)，并把这个函数赋值给变量login。
     * 2. 将login函数异步赋值给变量res，```const res= await login```，并返回其中data对象中的token属性。
+    * 3. 随后，在Login组件中，使用映射的方式，将状态和操作方法引进，并创建loginAction函数，在函数内获取用户数据和执行操作方法。
+        * ```
+            // 获取用户输入的数据
+            const mobile=this.formRef.current.getFieldValue("username")
+            const code=this.formRef.current.getFieldValue("password")
+            const userData={mobile,code}
+            console.log('Username:'+mobile,'Password:'+code);
+            // 执行操作方法
+            this.props.loginAction(userData)
+          ```
+    * 4. 获取用户数据后，设置if判断，若成功获取用户数据，则跳转到Layout组件中；否则，继续停留在Login组件。我的Login组件是类式组件，所以进行路由跳转，也就是编程式路由导航时，无法调用router6的hook。所以在/utils中创建了withRouter文件，在此文件中创建withRouter函数，并在Login组件中，将被connect函数处理过的Login作为参数传进withRouter函数中。
+        * ```
+            //withRouter函数
+            // 1. 引入useNavigate hook
+            import {  useNavigate } from "react-router-dom"
+
+            // 2. 创建withRouter函数，并传递形参Component，日后在引用withRouter函数的组件中传递该组件为参数
+            export const withRouter=(Component)=>{
+            // 3. 创建Wrapper函数，传参props
+            const Wrapper=(props)=>{
+                // 4. useNavigate实例化
+                const navigate=useNavigate()
+
+                // 7. 并将该组件返回
+                return(
+                <Component
+                // 5. 给组件添加navigate属性，其值为上面实例化的navigate
+                    navigate={navigate}
+                    // 6. 将组件原先的属性保留下来
+                    {...props}
+                />
+                )
+            }
+            // 返回Wrapper函数中添加了新属性的组件
+            return Wrapper
+            }
+          ```
+          * ```
+                // 调用WithRouter函数，参数应为组件，但同时暴露connect函数会报错，所以将在connect函数中处理的Login组件打包作为形参传入withRouter函数中
+                export default withRouter(
+                // 正常执行connect函数该干的映射操作
+                connect(
+                // 状态映射
+                state=>({login:state.login}),
+                // 操作状态的映射
+                {
+                    loginAction,
+                    loginAsync
+                }
+                )
+                // 注：在connect中处理后，返回，又作为withRouter的参数被处理(添加了个navigate属性)
+                (Login)
+                )
+            ```
 * 2.8 token持久化
     * 目标：能够统一处理token的持久化相关操作
     * 1. 创建utils/token.js文件
@@ -113,12 +167,15 @@
     * 3. 创建utils/index.js文件，统一导出token.js中的所有内容，来简化工具函数的导入
     * 4. 将登录操作中用到token的地方，替换为该工具函数
         * (1) reducers/login.js文件中，初始化登录列表的同时，调用getToken()，赋值给变量token
+        * (2) 将login函数异步赋值给变量res后，调用setToken()，传递res.data.token为参数，向localStorage中添加用户数据，以实现token持久化。
     * 持久化设置：
         * 目标：使用token函数持久化配置
         * 1. 拿到token的时候一式两份，存本地一份
         * 2. 初始化的时候优先从本地取，取不到在初始化为控制
 * 2.9 请求拦截器注入token
     * 目标：把token通过请求拦截器注入到请求头中
+    * 1. 在utils/http.js中的请求拦截器的成功的回调函数中，调用getToken()，来获取用户数据，取变量token、赋值
+    * 2. 创建if判断，传入的条件为token，判断内部设置在请求头部添加token用户数据，``` config.headers.Authorization = `Bearer ${token}` ```
 * 2.10 路由鉴权实现
     * 目标：能够实现未登录时访问拦截并跳转到登录页面
     * 1. 在components目录中，创建AuthRoute组件
@@ -130,16 +187,20 @@
 * 3.1 基本结构搭建
     * 目标：能够使用antd搭建基础布局，找到示例：顶部-侧边布局-通栏
     * 1. 打开antd/Layout布局组件，找到示例
-    * 2. 拷贝示例代码到Layout组件当中、
-    * 3. 分析并调整页面布局
+    * 2. 拷贝示例代码到Layout组件当中
+    * 3. 分析并调整页面布局，拷贝代码到Layout组件当中之后，在浏览器中渲染的效果不是我想要的效果，所以需要对其进行一些调整
+        * (1) 将侧边栏(Sider)部分的文本内容替换为```'数据概览','内容管理','发布文章'```
+        * (2) 给侧边栏的导航选项绑定单击事件，点击导航选项后，会在展示区展示与其对应的组件(Home、Article、Publish)的内容
 * 3.2 二级路由配置
     * 目标：能够在右侧内容区域展示左侧菜单对应的页面内容
     * 1. 在pages目录中，分别创建Home(数据概览)、Article(内容管理)、Publish(发布文章)页面文件夹
     * 2. 分别在三个文件夹中创建index.jsx，并创建基础组件后导出
     * 3. 在App.js中配置嵌套子路由，来Layout组件中配置路由出口
-    * 4. 使用Link修改左侧菜单内容，与子路由规则匹配实现路由切换
+    * 4. Layout组件中有items2，是侧边栏上三个图片遍历后返回的结果。遍历的回调中设置了label属性，是侧边栏中三个导航菜单选项的文本内容，想要把文本内容修改为我想要的文本内容，需要先添加单击事件的属性 onTitleClick。给单击事件绑定回调showCompon，并在调用showCompon函数前，创建subnav变量，变量值为由三个文本内容组成的数组，在showCompon函数中，使用forEach方法会subnav进行遍历，方法中传参item和index，以便于文本内容渲染在页面中
 * 3.3 菜单高亮显示
     * 目标：能够在页面刷新时保持对应菜单高亮
     * 1. 将Menu的key属性改为与其对应的路由地址
     * 2. 获取当前正在访问页面的路由地址
     * 3. 将当前路由地址设置为selectedKeys属性的值
+* 3.4 展示个人信息
+    * 目标：能够在页面右上角展示登录用户名
