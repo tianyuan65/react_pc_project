@@ -5,7 +5,7 @@ import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/
 // import {NavLink} from 'react-router-dom'
 // import {widthUseNavigate} from '../../utils/index'
 import { useNavigate } from 'react-router-dom';
-import Home from '../Home';
+// import Home from '../Home';
 
 const { Header, Content, Sider } = Layout;
 
@@ -14,7 +14,7 @@ const items1 = ['1', '2', '3'].map((key) => ({
   label: `nav ${key}`,
 }));
 
-const subnav=['数据概览','内容管理','发布文章']
+// const subnav=['数据概览','内容管理','发布文章']
 // const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, index) => {
 //   const subKey = String(index + 1);
 //   return {
@@ -35,17 +35,17 @@ const subnav=['数据概览','内容管理','发布文章']
 
 const items3=[
   {
-    key:'/home',
+    key:'/layout/home',
     icon:React.createElement(UserOutlined),
     label:`数据概览`
   },
   {
-    key:'/article',
+    key:'/layout/article',
     icon:React.createElement(LaptopOutlined),
     label:`内容管理`
   },
   {
-    key:'/publish',
+    key:'/layout/publish',
     icon:React.createElement(NotificationOutlined),
     label:`发布文章`
   }

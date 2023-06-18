@@ -195,8 +195,10 @@
     * 目标：能够在右侧内容区域展示左侧菜单对应的页面内容
     * 1. 在pages目录中，分别创建Home(数据概览)、Article(内容管理)、Publish(发布文章)页面文件夹
     * 2. 分别在三个文件夹中创建index.jsx，并创建基础组件后导出
-    * 3. 在App.js中配置嵌套子路由，来Layout组件中配置路由出口
-    * 4. Layout组件中有items2，是侧边栏上三个图片遍历后返回的结果。遍历的回调中设置了label属性，是侧边栏中三个导航菜单选项的文本内容，想要把文本内容修改为我想要的文本内容，需要先添加单击事件的属性 onTitleClick。给单击事件绑定回调showCompon，并在调用showCompon函数前，创建subnav变量，变量值为由三个文本内容组成的数组，在showCompon函数中，使用forEach方法会subnav进行遍历，方法中传参item和index，以便于文本内容渲染在页面中
+    * 3. 在App.js中配置嵌套子路由，来Layout组件中配置路由出口，不用路由表，使用路由表就需要将App下所有子组件都写入路由表中，但因为在Login和Layout之间需要进行路由鉴权，所以不能一半路由表，一半一般路由配置。这里都是用一般的二级路由配置，并且匹配的路由地址需要写完整
+    * 4. 创建由三个对象组成的数组，赋值给变量items3，每个对象含三个属性key、icon、label。key属性的值为```/layout/Home||Article||Publish```。
+        * 4.1 将原先Menu标签中items属性的值替换为items3(原先是items2)，并在Menu标签中添加onClick事件，给onClick事件绑定click函数。在调用click函数前，引入useNavigate hook，在组件内调用赋值给变量navigate。在click函数中调用navigate()，给navigate方法传第一个参数e.key，意为点击items3中的哪一个对象就跳转到与其路径相匹配的组件当中，并展示其组件的内容；给navigate方法传第二个参数replace，值为false，意为设置跳转模式，不替代
+        * 4.2 **不用了的方法，已用items3替代items2**：Layout组件中有items2，是侧边栏上三个图片遍历后返回的结果。遍历的回调中设置了label属性，是侧边栏中三个导航菜单选项的文本内容，想要把文本内容修改为我想要的文本内容，需要先添加单击事件的属性 onTitleClick。给单击事件绑定回调showCompon，并在调用showCompon函数前，创建subnav变量，变量值为由三个文本内容组成的数组，在showCompon函数中，使用forEach方法会subnav进行遍历，方法中传参item和index，以便于文本内容渲染在页面中
 * 3.3 菜单高亮显示
     * 目标：能够在页面刷新时保持对应菜单高亮
     * 1. 将Menu的key属性改为与其对应的路由地址
