@@ -15,10 +15,10 @@ import { LOGIN } from '../constant';
 export const loginAction=data=>({type:LOGIN,data})
 
 // 异步登录对象
-export const loginAsync=(data,time)=>{
-    return (dispatch)=>{
-        setTimeout(()=>{
-            dispatch(loginAction(data))
-        },time)
-    }
-}
+// export const loginAsync=(data,time)=>{
+//     return (dispatch)=>{
+//         setTimeout(()=>{
+//             dispatch(loginAction(data))
+//         },time)
+//     }
+// }

@@ -4,7 +4,7 @@ import './index.scss'
 import { Card, Checkbox, Form, Input,Button,message } from 'antd'
 import logoPng from '../../assets/logo.png'
 import {connect} from 'react-redux'
-import { loginAction, loginAsync } from '../../redux/actions/login'
+import { loginAction } from '../../redux/actions/login'
 // 引入withRouter函数
 import { withRouter } from '../../utils/withRouter'
 
@@ -56,14 +56,13 @@ class Login extends Component{
     }
   }
   
-
-  loginAsync=()=>{
-    const mobile=this.formRef.current.getFieldValue("username")
-    const code=this.formRef.current.getFieldValue("password")
-    const userObj={mobile,code}
-    const userData=this.props.loginAsync(userObj,0)
-    console.log(userData);
-  }
+  // loginAsync=()=>{
+  //   const mobile=this.formRef.current.getFieldValue("username")
+  //   const code=this.formRef.current.getFieldValue("password")
+  //   const userObj={mobile,code}
+  //   const userData=this.props.loginAsync(userObj,0)
+  //   console.log(userData);
+  // }
 
   render(){
     return (
@@ -159,7 +158,7 @@ export default withRouter(
   // 操作状态的映射
   {
     loginAction,
-    loginAsync
+    // loginAsync
   }
   )
   // 注：在connect中处理后，返回，又作为withRouter的参数被处理(添加了个navigate属性)

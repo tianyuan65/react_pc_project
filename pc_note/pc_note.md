@@ -202,7 +202,62 @@
 * 3.3 菜单高亮显示
     * 目标：能够在页面刷新时保持对应菜单高亮
     * 1. 将Menu的key属性改为与其对应的路由地址
+        * 此处注意：key属性的值和注册路由时跳转的路由地址必须保持正确。首先，注册路由的规范写法应为```<Route path='home' element={<Home />}/>```，若path属性的值是```/layout/home```，到时候匹配的路径就会成为```http://localhost:3000/layout/layout/home```，因此必须拿规范写法书写。其次，key属性的值有两种写法，一种是相对路径的写法，就是下面代码示例；另一种就是绝对路径写法，```key:'/layout/home'```，当路由地址最前面有```/```的时候，意为替代原先地根路由地址，key的值称为新的路由地址，举个例子的话，若key的值为/home，那路由跳转的时候会跳转为```http://localhost:3000/home```，没有与此路径 匹配的路由。
+        * ```
+            const items3=[
+                {
+                    key:'home',
+                    icon:React.createElement(UserOutlined),
+                    label:`数据概览`
+                },
+                {
+                    key:'article',
+                    icon:React.createElement(LaptopOutlined),
+                    label:`内容管理`
+                },
+                {
+                    key:'publish',
+                    icon:React.createElement(NotificationOutlined),
+                    label:`发布文章`
+                }
+            ]
+          ```
     * 2. 获取当前正在访问页面的路由地址
+        * 调用useLocation hook来获取当前所在路径地址，获取后可以从中查看pathname属性，其属性值为当前所在路径地址，获取当前正在访问页面的路由地址有两种方法，一种为调用useLocation hook后得到的对象中用解构赋值的方式获取；另一种为调用useLocation hook后，把结果赋值给变量location，又从location中，以将location.pathname，赋值给另一变量的方法
+            * ```
+                const location=useLocation()
+                console.log('location',location);  // 'location' Object
+                // 当前所在的路径地址
+                const selectedKey=location.pathname
+                console.log('currentUrl',selectedKey);
+              ```
     * 3. 将当前路由地址设置为selectedKeys属性的值
+        * ```
+            <Menu defaultSelectedKeys={[selectedKey]} selectedKeys={[selectedKey]}/>
+          ```
 * 3.4 展示个人信息
     * 目标：能够在页面右上角展示登录用户名
+    * 1. 在redux/action和redux/reducers中各自添加用于获取用户信息的代码
+    * 2. 在redux/reducers/index.js文件中添加useReducer的函数
+        * 重新输入手机号和验证码，登录之后可以从action的data中获取输入的手机号码。此时调用get方法来从服务器端获取用户的信息userInfo，发送请求后，会先进入utils/http文件中请求拦截器的回调当中。因为肯定会从本地存储(localStorage)中获取token的值，所以进入if判断后，和login一样会在请求头信息中添加Authorization的值(就是token的值)。正式发送请求到服务器端之后，服务器对请求数据进行一系列的审核，若合法，便发送成功的响应给我，其成功的响应进入响应拦截器中，并返回成功的响应结果。拿着成功的响应结果，回到userReducer中，在get方法中又对成功的响应数据进行一些处理后，把其数据赋值给变量userInfo，打印userInfo就会发现，它是个对象，我需要的是其对象里data属性里的data属性里的mobile属性的值，因此另起变量名userMobile，```const userName=userInfo.data; return userName.data```。
+    * 3. 在Layout组件中调用useReducer的函数，获取用户数据
+        * 在Layout组件中通过connect函数获取映射的状态和操作方法，```state=>({userInfo:state.user}),{userAction}```，
+    * 4. 在Layout组件中获取个人信息并展示
+        * 实现该功能执行的代码顺序为此，创建userAction对象->将带有type属性和data属性的对象dispatch给store->store将preState打包给userReducer进行处理，也就是进入switch判断中->若条件符合判断条件，则在判断内部对服务器(http://geek.itheima.net/v1_0user/profile)，发送get请求，从服务器中获取想要的用户的所有数据(这部分具体运行过程详细看3.4.2，就是怎么发送请求，得到成功响应后怎么处理数据)->成功获取数据userName后，暴露该结果，store/index.js引入，统一暴露，以便于在组件中提取使用->组件(Layout)当中，调用useEffect hook，在其回调函数内部执行，从props中解构赋值出的userAction()，若没有进行解构赋值的步骤的话，需写成props.userAction()，值得注意的是，useEffect hook接收两个参数，第二个参数为数组，可传递空数组作为依赖项，也可指定特定的依赖项，以防止避免无限循环更新和"Maximum update depth exceeded"错误的发生(我就发生了，问了chatgbt才恢复正常的)，在此我是将特定的依赖项作为参数传递的。最后在需要用到用户数据的位置，也就是页面头部的右侧中使用{userInfo.name}来展示用户名，我现在不知道什么原因不展示，只能先写死，要不然啥也没有
+            * ```
+                useEffect( 
+                    // 回调
+                    ()=>{
+                    // 执行操作方法
+                    userAction()
+                },[userAction])
+              ```
+* 3.5. 退出登录实现
+    * 目标：能够实现退出登录功能
+    * 1. 为气泡确认框添加确认回调事件
+    * 2. 在action/login.js中添加退出登录的对象，在reducers中，创建logoutReducer，并在其中新增退出登录的函数logout，删除token
+    * 3. 在回调事件中，调用logoutReducer中的logout函数
+    * 4. 退出后，返回登录页面
+        * ```
+            this.props.navigate('/login')
+          ```

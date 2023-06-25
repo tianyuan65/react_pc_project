@@ -1,11 +1,13 @@
-import React from 'react'
-import { Breadcrumb,Layout, Menu, theme } from 'antd'
-import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-// import './index.scss'
+import React,{useEffect} from 'react'
+import { 
+  // Breadcrumb,
+  Layout, Menu, Popconfirm, theme } from 'antd'
+import { LaptopOutlined, NotificationOutlined, UserOutlined,LogoutOutlined } from '@ant-design/icons';
 // import {NavLink} from 'react-router-dom'
-// import {widthUseNavigate} from '../../utils/index'
-import { useNavigate } from 'react-router-dom';
-// import Home from '../Home';
+import {userAction} from '../../redux/actions/user';
+import { useNavigate,useLocation,Outlet } from 'react-router-dom';
+import { connect } from 'react-redux';
+import './index.scss'
 
 const { Header, Content, Sider } = Layout;
 
@@ -14,69 +16,79 @@ const items1 = ['1', '2', '3'].map((key) => ({
   label: `nav ${key}`,
 }));
 
-// const subnav=['数据概览','内容管理','发布文章']
-// const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, index) => {
-//   const subKey = String(index + 1);
-//   return {
-//     key: `sub${subKey}`,
-//     icon: React.createElement(icon),
-//     label: `${subnav[index]}`,
-//     children: new Array(4).fill(null).map((_, j) => {
-//       const subKey = index * 4 + j + 1;
-//       return {
-//         key: subKey,
-//         label: `option${subKey}`,
-//       };
-//     }),
-//     // 点击子菜单标题
-//     onTitleClick:()=>showCompon()
-//   };
-// });
+// /layout/layout/home
+// /layout /  layout/home
 
 const items3=[
   {
+    // /home home
     key:'/layout/home',
     icon:React.createElement(UserOutlined),
     label:`数据概览`
   },
   {
-    key:'/layout/article',
+    key:'article',
     icon:React.createElement(LaptopOutlined),
     label:`内容管理`
   },
   {
-    key:'/layout/publish',
+    key:'publish',
     icon:React.createElement(NotificationOutlined),
     label:`发布文章`
   }
 ]
 
-// showCompon函数，点击导航选项后触发此函数，文本高亮，路由跳转到点击的组件，在展示区展示对应组件内容
-// const showCompon=()=>{
-//   // 遍历subnav，将三个文本渲染到页面当中
-//   subnav.forEach((item)=>{
-//     console.log('subnav',`${item}`);
-//     // 路由跳转到对应的路由
-//     // this.props.history.push('/article');
-//     //在展示区渲染点击的子菜单对应的组件
-//     <Navigate to='/home' element={<Home/>}/>
-//   })
-// }
+// after login, token is get
+// token is identification  username and token is pair. so use token,
+// we can identify username and it is login success
+// server side get header.authorization attribute first and varify token is valid.
 
-export default function GeekLayout() {
+function GeekLayout(props) {
+  console.log('props',props);  //props {userInfo: undefined, userAction: ƒ}
+  const {userInfo,userAction}=props
+  console.log('userInfo:',userInfo);
+
   const navigate=useNavigate()
+  const location=useLocation()
+  console.log('location',location);  // 'location' Object
+  // 当前所在的路径地址
+  const selectedKey=location.pathname
+  console.log('currentUrl',selectedKey);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
   const click=(e)=>{
     console.log('clickEvent',e);
-    navigate(e.key,{
-      replace:false,
-      
+    const {key}=e
+    console.log('diffKeys',key);  //diffKeys layout/home
+    // 此方法为react-router5中，路由跳转时使用的方法，router6不适用
+    // this.props.history.push(e.key)
+    navigate(key,{
+      replace:false
     });
   }
 
+  // call back
+  // when Effect event is triggered and then call  callback method
+
+  // callback call action, 
+  // this.props.userMobile <=> reducer state.mobile
+  // this.props.userAction <=> action userAction 
+  // call action() -> store.dispatch(action) -> reducer.switch -> case user -> get(user/profile)
+  //                                                                store <- user.mobile(share)
+
+  // 
+  useEffect( 
+    // 回调
+    ()=>{
+    // 执行操作方法
+    userAction()
+    
+    // userAction variable
+    // userAction()
+      
+  },[userAction])
   return (
     <div>
       <Layout>
@@ -86,8 +98,16 @@ export default function GeekLayout() {
             alignItems: 'center',
           }}
         >
-          <div className="demo-logo" />
+          <div className="demo-logo" width="200px" height="60px" background="url(../../assets/logo.png) no-repeat center / 160px auto" />
           <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']} items={items1} />
+          <div className="user-info">
+            <span className="user-name">user.name:潇洒哥112{userInfo.name}</span>
+            <span className="user-logout">
+              <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消" onClick={onLogout}>
+                <LogoutOutlined/> 退出
+              </Popconfirm>
+            </span>
+          </div>
         </Header>
         <Layout>
           <Sider
@@ -96,10 +116,15 @@ export default function GeekLayout() {
               background: colorBgContainer,
             }}
           >
+            {/* 选项高亮原理：defaultSelectedKeys===item.key */}
+            {/* 需获取当前激活的path路径 */}
             <Menu
               mode="inline"
-              defaultSelectedKeys={['1']}
+              // 后续会有多级路由，会是当前路由地址(对象)下，由多个对象组成的数组，所以虽然目前只是一个，selectedKeys属性的值也要写成数组形式的
+              defaultSelectedKeys={[selectedKey]}
+              // theme="dark"
               // defaultOpenKeys={['sub1']}
+              selectedKeys={selectedKey}
               style={{
                 height: '100%',
                 borderRight: 0,
@@ -107,15 +132,6 @@ export default function GeekLayout() {
               items={items3}
               onClick={click}
             >
-              {/* <Menu.Item icon={<UserOutlined/>} key="/home">
-                <Link to="/home">数据概览</Link>
-              </Menu.Item>
-              <Menu.Item icon={<LaptopOutlined/>} key="/article">
-                <Link to="/article">内容管理</Link>
-              </Menu.Item>
-              <Menu.Item icon={<NotificationOutlined/>} key="/publish">
-                <Link to="/publish">发布文章</Link>
-              </Menu.Item> */}
             </Menu>
           </Sider>
           <Layout
@@ -123,7 +139,7 @@ export default function GeekLayout() {
               padding: '0 24px 24px',
             }}
           >
-            <Breadcrumb
+            {/* <Breadcrumb
               style={{
                 margin: '16px 0',
               }}
@@ -131,7 +147,7 @@ export default function GeekLayout() {
               <Breadcrumb.Item>Home</Breadcrumb.Item>
               <Breadcrumb.Item>List</Breadcrumb.Item>
               <Breadcrumb.Item>App</Breadcrumb.Item>
-            </Breadcrumb>
+            </Breadcrumb> */}
             <Content
               style={{
                 padding: 24,
@@ -140,7 +156,8 @@ export default function GeekLayout() {
                 background: colorBgContainer,
               }}
             >
-              内容
+              {/* 占位符 展示二级路由的内容 */}
+              <Outlet/>
             </Content>
           </Layout>
         </Layout>
@@ -149,3 +166,10 @@ export default function GeekLayout() {
     </div>  
   )
 }
+
+export default connect(
+  // 状态映射
+  state=>({userInfo:state.user}),
+  // 操作方法映射
+  {userAction}
+)(GeekLayout)

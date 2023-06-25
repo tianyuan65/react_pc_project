@@ -2,7 +2,10 @@
 import {combineReducers} from 'redux'
 // 引入loginReducer
 import {loginReducer} from './login'
+// 引入userReducer
+import {userReducer} from './user'
 
 export default combineReducers({
-    loginReducer
+    login:loginReducer,
+    user:userReducer
 })

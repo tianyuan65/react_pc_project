@@ -33,6 +33,8 @@ async function loginReducer(preState=initState,action) {
             setToken(res.data.data.token)
             // 返回结果
             return  res.data.data.token
+            // return 1s
+           
                 
             // res.data.token
             // login:async data=>{
@@ -44,4 +46,4 @@ async function loginReducer(preState=initState,action) {
     }
 }
 
-export  {loginReducer}
+export {loginReducer}
