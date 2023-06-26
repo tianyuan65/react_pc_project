@@ -5,6 +5,7 @@ import {
 import { LaptopOutlined, NotificationOutlined, UserOutlined,LogoutOutlined } from '@ant-design/icons';
 // import {NavLink} from 'react-router-dom'
 import {userAction} from '../../redux/actions/user';
+import {logoutAction} from '../../redux/actions/login'
 import { useNavigate,useLocation,Outlet } from 'react-router-dom';
 import { connect } from 'react-redux';
 import './index.scss'
@@ -87,8 +88,14 @@ function GeekLayout(props) {
     
     // userAction variable
     // userAction()
-      
   },[userAction])
+
+  // 确认退出
+  const onLogout=()=>{
+    // 退出登录，要删除token，跳回到登录界面
+    logoutAction()
+    navigate('/login',{replace:false})
+  }
   return (
     <div>
       <Layout>
@@ -103,7 +110,7 @@ function GeekLayout(props) {
           <div className="user-info">
             <span className="user-name">user.name:潇洒哥112{userInfo.name}</span>
             <span className="user-logout">
-              <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消" onClick={onLogout}>
+              <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消" onConfirm={onLogout}>
                 <LogoutOutlined/> 退出
               </Popconfirm>
             </span>
@@ -169,7 +176,7 @@ function GeekLayout(props) {
 
 export default connect(
   // 状态映射
-  state=>({userInfo:state.user}),
+  state=>({userInfo:state.user,logout:state.login}),
   // 操作方法映射
-  {userAction}
+  {userAction,logoutAction}
 )(GeekLayout)
