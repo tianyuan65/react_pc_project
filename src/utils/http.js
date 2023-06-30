@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getToken } from './token';
+import { clearToken, getToken } from './token';
 
 const http=axios.create({
     // 设置URL基础结构
@@ -30,6 +30,17 @@ http.interceptors.response.use(response=>{
     return response
 },error=>{
     console.log('响应拦截器login-失败');
+    console.dir(error);
+    if (error.response.status===401) {
+        // 删除token
+        clearToken()
+        // console.log('login');
+        // 跳转到登录页
+        // history.push('/login')
+        //  <Navigate to="/login"/>
+        // 纯JavaScript原生的跳转路由方式
+        window.location.href='/login'
+    }
     return Promise.reject(error)
 })
 

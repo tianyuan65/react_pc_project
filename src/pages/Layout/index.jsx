@@ -5,10 +5,10 @@ import {
 import { LaptopOutlined, NotificationOutlined, UserOutlined,LogoutOutlined } from '@ant-design/icons';
 // import {NavLink} from 'react-router-dom'
 import {userAction} from '../../redux/actions/user';
-import {logoutAction} from '../../redux/actions/login'
 import { useNavigate,useLocation,Outlet } from 'react-router-dom';
 import { connect } from 'react-redux';
 import './index.scss'
+import { clearToken,http } from '../../utils';
 
 const { Header, Content, Sider } = Layout;
 
@@ -22,7 +22,7 @@ const items1 = ['1', '2', '3'].map((key) => ({
 
 const items3=[
   {
-    // /home home
+    // difference of /home & home
     key:'/layout/home',
     icon:React.createElement(UserOutlined),
     label:`数据概览`
@@ -43,26 +43,26 @@ const items3=[
 // token is identification  username and token is pair. so use token,
 // we can identify username and it is login success
 // server side get header.authorization attribute first and varify token is valid.
+// 
 
 function GeekLayout(props) {
   console.log('props',props);  //props {userInfo: undefined, userAction: ƒ}
-  const {userInfo,userAction}=props
-  console.log('userInfo:',userInfo);
+  const {userAction}=props
 
   const navigate=useNavigate()
   const location=useLocation()
-  console.log('location',location);  // 'location' Object
+  // console.log('location',location);  // 'location' Object
   // 当前所在的路径地址
   const selectedKey=location.pathname
-  console.log('currentUrl',selectedKey);
+  // console.log('currentUrl',selectedKey);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
   const click=(e)=>{
-    console.log('clickEvent',e);
+    // console.log('clickEvent',e);
     const {key}=e
-    console.log('diffKeys',key);  //diffKeys layout/home
+    // console.log('diffKeys',key);  //diffKeys layout/home
     // 此方法为react-router5中，路由跳转时使用的方法，router6不适用
     // this.props.history.push(e.key)
     navigate(key,{
@@ -78,22 +78,43 @@ function GeekLayout(props) {
   // this.props.userAction <=> action userAction 
   // call action() -> store.dispatch(action) -> reducer.switch -> case user -> get(user/profile)
   //                                                                store <- user.mobile(share)
+  
+  // const getUserInfo=async ()=>await http.get('http://geek.itheima.net/v1_0/user/profile').then(res=>{
+  //   // console.log('res:',res);  
+  //   return res=res.data.data
+  // })
 
-  // 
-  useEffect( 
+  // 1. send get  result
+  // 2. result send to redux
+  // 3. return data in reducer for share 
+  // 4. in component use shared data
+  useEffect(
     // 回调
     ()=>{
-    // 执行操作方法
-    userAction()
-    
-    // userAction variable
-    // userAction()
-  },[userAction])
+      // 1. send get  result
+      // 在useEffect中发送get请求
+      const getUserInfo=async ()=>{
+        const response=await http.get('http://geek.itheima.net/v1_0/user/profile')
+        console.log('res',response);
+        const userInfo=response.data.data
+        console.log('newUserInfo',userInfo);
+        // 2. result send to redux
+        // 执行操作方法，并需要传入存有用户数据的变量作为参数
+        userAction(userInfo)
+      }
+      getUserInfo()
+      // userAction variable
+      // userAction()
+    },[userAction])
 
+  const {userInfo}=props
+  console.log('userInfo:',userInfo);
   // 确认退出
   const onLogout=()=>{
     // 退出登录，要删除token，跳回到登录界面
-    logoutAction()
+    // 删除token不需要使用redux共享数据，直接在确认退出的函数里调用删除token的函数即可
+    // logoutAction()
+    clearToken()
     navigate('/login',{replace:false})
   }
   return (
@@ -108,7 +129,8 @@ function GeekLayout(props) {
           <div className="demo-logo" width="200px" height="60px" background="url(../../assets/logo.png) no-repeat center / 160px auto" />
           <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']} items={items1} />
           <div className="user-info">
-            <span className="user-name">user.name:潇洒哥112{userInfo.name}</span>
+            {/* 4. in component use shared data */}
+            <span className="user-name">{userInfo.data.name}</span>
             <span className="user-logout">
               <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消" onConfirm={onLogout}>
                 <LogoutOutlined/> 退出
@@ -176,7 +198,7 @@ function GeekLayout(props) {
 
 export default connect(
   // 状态映射
-  state=>({userInfo:state.user,logout:state.login}),
+  state=>({userInfo:state.user}),
   // 操作方法映射
-  {userAction,logoutAction}
+  {userAction}
 )(GeekLayout)

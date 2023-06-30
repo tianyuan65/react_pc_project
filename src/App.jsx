@@ -10,12 +10,8 @@ import AuthRoute from './components/AuthRoute'
 import Home from './pages/Home';
 import Article from './pages/Article';
 import Publish from './pages/Publish';
-// 引入路由表
-// import routes from './routes';
 
 function App() {
-  // 根据路由表生成对应的路由规则
-  // const element=useRoutes(routes)
   return (
     <div className="App">
       <Routes>

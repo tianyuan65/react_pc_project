@@ -243,21 +243,64 @@
     * 3. 在Layout组件中调用useReducer的函数，获取用户数据
         * 在Layout组件中通过connect函数获取映射的状态和操作方法，```state=>({userInfo:state.user}),{userAction}```，
     * 4. 在Layout组件中获取个人信息并展示
-        * 实现该功能执行的代码顺序为此，创建userAction对象->将带有type属性和data属性的对象dispatch给store->store将preState打包给userReducer进行处理，也就是进入switch判断中->若条件符合判断条件，则在判断内部对服务器(http://geek.itheima.net/v1_0user/profile)，发送get请求，从服务器中获取想要的用户的所有数据(这部分具体运行过程详细看3.4.2，就是怎么发送请求，得到成功响应后怎么处理数据)->成功获取数据userName后，暴露该结果，store/index.js引入，统一暴露，以便于在组件中提取使用->组件(Layout)当中，调用useEffect hook，在其回调函数内部执行，从props中解构赋值出的userAction()，若没有进行解构赋值的步骤的话，需写成props.userAction()，值得注意的是，useEffect hook接收两个参数，第二个参数为数组，可传递空数组作为依赖项，也可指定特定的依赖项，以防止避免无限循环更新和"Maximum update depth exceeded"错误的发生(我就发生了，问了chatgbt才恢复正常的)，在此我是将特定的依赖项作为参数传递的。最后在需要用到用户数据的位置，也就是页面头部的右侧中使用{userInfo.name}来展示用户名，我现在不知道什么原因不展示，只能先写死，要不然啥也没有
+        * 实现该功能执行的代码顺序为此，1. 创建userAction对象->2. 将带有type属性和data属性的对象dispatch给store->store将preState打包给userReducer进行处理，也就是进入switch判断中->3. 若条件符合判断条件，则在判断内部对服务器(http://geek.itheima.net/v1_0user/profile)，发送get请求，从服务器中获取想要的用户的所有数据(这部分具体运行过程详细看3.4.2，就是怎么发送请求，得到成功响应后怎么处理数据)->4. 成功获取数据userName后，暴露该结果，store/index.js引入，统一暴露，以便于在组件中提取使用->5. 组件(Layout)当中，调用useEffect hook，在其回调函数内部执行，从props中解构赋值出的userAction()，若没有进行解构赋值的步骤的话，需写成props.userAction()，值得注意的是，useEffect hook接收两个参数，第二个参数为数组，可传递空数组作为依赖项，也可指定特定的依赖项，以防止避免无限循环更新和"Maximum update depth exceeded"错误的发生(我就发生了，问了chatgbt才恢复正常的)，在此我是将特定的依赖项作为参数传递的。最后在需要用到用户数据的位置，也就是页面头部的右侧中使用{userInfo.data.name}来展示用户名
+    * 5. 正常应该是按照上面的步骤逐步进行，但我行不通，所以需要想另外的方法。我现在能展示了，但是不能刷新
+        * 5.1 在Layout组件的useEffect方法的回调中，创建一个异步向服务器发送请求的函数，将其命名为getUserInfo，此函数中使用await/async方法向服务器发送get请求，获取成功的响应后，将其结果赋值给变量response。打印response之后会发现，其结果是一个对象，我需要的是此对象的data属性的data属性中的某个属性的值(name属性)的值，所以设置变量userInfo，并将response.data.data赋值给userInfo。
+        * 5.2 在getUserInfo函数内执行操作方法userAction()，并将存有用户数据的变量userInfo作为参数传递进去，以此实现将获取到的用户数据结果发送到redux中。
+        * 5.3 发送用户数据结果到redux中后，在redux/reducers/user.js中将获取到的结果原原本本地返回并共享。
             * ```
-                useEffect( 
-                    // 回调
+                case USER:
+                    console.log('成功进入switch判断');
+                    // 3. return data in reducer for share 
+                    // 返回并共享从Layout组件中传递的数据
+                    return {
+                        ...preState,
+                        data
+                    }
+              ```
+        * 5.4 回到Layout组件在展示用户数据的位置用{userInfo.data.xxx}的方式，使用从redux共享的数据即可。
+            * ```
+                useEffect(
                     ()=>{
-                    // 执行操作方法
-                    userAction()
-                },[userAction])
+                    // 1. send get  result
+                    // 在useEffect中发送get请求
+                    const getUserInfo=async ()=>{
+                        const response=await http.get('http://geek.itheima.net/v1_0/user/profile')
+                        const userInfo=response.data.data
+                        // 2. result send to redux
+                        // 执行操作方法，并需要传入存有用户数据的变量作为参数
+                        userAction(userInfo)
+                    }
+                    getUserInfo()
+                    },[userAction])
               ```
 * 3.5. 退出登录实现
     * 目标：能够实现退出登录功能
     * 1. 为气泡确认框添加确认回调事件
-    * 2. 在action/login.js中添加退出登录的对象，在reducers中，创建logoutReducer，并在其中新增退出登录的函数logout，删除token
-    * 3. 在回调事件中，调用logoutReducer中的logout函数
-    * 4. 退出后，返回登录页面
+    * 2. 退出登录中的一个点：删除token，此步骤不需要在redux中共享数据，只在logout函数中，调用删除token的方法，clearToken()即可
+    * 3. 退出后，返回登录页面
         * ```
-            this.props.navigate('/login')
+            const onLogout=()=>{
+                // 退出登录，要删除token，跳回到登录界面
+                // 删除token不需要使用redux共享数据，直接在确认退出的函数里调用删除token的函数即可
+                // logoutAction()
+                clearToken()
+                navigate('/login',{replace:false})
+            }
           ```
+* 3.6 处理Token失效，token有有效时间，一般是在两个小时左右，当超过这个规定时间时，token会失效，此时token就无法在request header部分做鉴权了
+    * 目标：能够在响应拦截器中处理token失效
+    * **说明：为了能够在非组件环境下拿到路由信息，需要安装一个history包--mobx**
+    * 1. 通过响应拦截器处理token失效，如果发现是401，则调回到登录页面
+    * 2. 在http文件的响应拦截器的响应拦截器失败的回调中，设置一个if判断，其判断条件为错误结果的响应状态码等于401，满足该判断条件时，在判断内调用删除token的方法
+    * 3. 并在其判断中设置，当满足判断条件时，路由跳转到Login组件当中。但因http是工具文件，无法在其中调用和使用router6 专用的useNavigate hook & Navigate组件，因此需要以纯JavaScript原生的路由跳转方式，来实现路由跳转。
+        * ```
+            if (error.response.status===401) {
+                // 删除token
+                clearToken()
+                // 跳转到登录页
+                // 纯JavaScript原生的跳转路由方式
+                window.location.href='/login'
+            }
+          ```
+    

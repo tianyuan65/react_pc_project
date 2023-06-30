@@ -1,6 +1,8 @@
 // import { http } from '../../utils/http';
 // import {setToken,getToken} from '../../utils/token'
-import { LOGIN,LOGOUT } from '../constant';
+import { LOGIN,
+    // LOGOUT 
+} from '../constant';
 
 // export default class loginAction {
 //     token=getToken() || ''
@@ -22,6 +24,3 @@ export const loginAction=data=>({type:LOGIN,data})
 //         },time)
 //     }
 // }
-
-// 创建并暴露logoutAction对象
-export const logoutAction=data=>({type:LOGOUT,data})

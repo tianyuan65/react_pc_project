@@ -1,7 +1,9 @@
 // 根据action中type值，在switch循环中得到一个结果，这个结果是在其他组件上可以获取到的
 // 登录模块
-import {LOGIN,LOGOUT} from "../constant"
-import {setToken,getToken,http,clearToken} from '../../utils'
+import {LOGIN,
+    // LOGOUT
+} from "../constant"
+import {setToken,getToken,http} from '../../utils'
 
 // 初始化登录列表
 const initState=[{mobile:' ',code:' '}]
@@ -38,12 +40,9 @@ async function loginReducer(preState=initState,action) {
             //     const res=await http.post('http://geek.itheima.net/v1_0/authorizations',{data})
             //     // this.token=res.data.token
             // }
-        case LOGOUT:
-            console.log(token);
-            return clearToken()
         default:
             return preState
     }
 }
 
-export {loginReducer}
+export default loginReducer
