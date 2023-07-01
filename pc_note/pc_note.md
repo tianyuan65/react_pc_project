@@ -290,7 +290,7 @@
           ```
 * 3.6 处理Token失效，token有有效时间，一般是在两个小时左右，当超过这个规定时间时，token会失效，此时token就无法在request header部分做鉴权了
     * 目标：能够在响应拦截器中处理token失效
-    * **说明：为了能够在非组件环境下拿到路由信息，需要安装一个history包--mobx**
+    * **说明：为了能够在非组件环境下拿到路由信息，需要安装一个history包--Mobx**
     * 1. 通过响应拦截器处理token失效，如果发现是401，则调回到登录页面
     * 2. 在http文件的响应拦截器的响应拦截器失败的回调中，设置一个if判断，其判断条件为错误结果的响应状态码等于401，满足该判断条件时，在判断内调用删除token的方法
     * 3. 并在其判断中设置，当满足判断条件时，路由跳转到Login组件当中。但因http是工具文件，无法在其中调用和使用router6 专用的useNavigate hook & Navigate组件，因此需要以纯JavaScript原生的路由跳转方式，来实现路由跳转。
@@ -303,4 +303,11 @@
                 window.location.href='/login'
             }
           ```
+* 3.7 首页Home图标展示
+    * 目标：实现首页echart图标封装展示
+    * 1. 使用echarts配合react封装柱状图组件Bar
+        * 1.1 在ECHARTS官网首页中点击快速入门->在项目中引入ECharts
+        * 1.2 按照要求，通过 npm 安装 ECharts ```npm install echarts --save```
+        * 1.3 首先，引入ECharts demo，让代码先跑起来，并在Home组件中展示柱状图；其次，按照需求，抽象处理需要自定义的参数
+    * 2. 要求组件的标题title，横向数据XData，纵向数据YData，样式style可定制
     
