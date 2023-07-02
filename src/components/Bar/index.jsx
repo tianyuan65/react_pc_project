@@ -37,8 +37,9 @@ export default function Bar({title,xData,yData,style}) {
   useEffect(()=>{
     chartInit(title,xData,yData,style)
   },
-  // 添加一个空的依赖项
-  [xData,yData])
+  // 添加特定的依赖项
+//   [xData,yData]
+  )
   return (
     <div>
       {/* 准备一个挂载节点 */}

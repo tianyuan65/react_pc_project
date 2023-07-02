@@ -310,4 +310,15 @@
         * 1.2 按照要求，通过 npm 安装 ECharts ```npm install echarts --save```
         * 1.3 首先，引入ECharts demo，让代码先跑起来，并在Home组件中展示柱状图；其次，按照需求，抽象处理需要自定义的参数
     * 2. 要求组件的标题title，横向数据XData，纵向数据YData，样式style可定制
-    
+        * 2.1 将原先写在Home组件的代码搬到components/Bar组件当中，并在Home组件引入Bar组件后，渲染Bar组件，此时点击数据概览的导航选项，就会看到两个柱状图。
+        * 2.2 回到Bar组件，按照需求，可以将可定制的(如横/纵向文本和数据、柱状图的title、样式等)抽离为一个一个的参数，最后可以将这些参数传递给Bar组件，当做props来使用。
+
+## 四、文章管理模块
+* 4.1 筛选区结构
+    * 目标：能够使用antd组件库搭建筛选区域结构
+    * 1. 从antd引入Card,Breadcrumb, Form, Button, Radio, DatePicker, Select组件。共分五个小部分，头部部分、状态部分、频道部分、日期部分、筛选按钮部分
+    * 2. 头部：Card组件的title属性的值为展示当前所在路由地址的导航的标签
+    * 3. 状态：Card标签的子标签Form，添加onFinish属性和initialValues属性。onFinish属性绑定一个函数，选择好状态、频道、日期选项后，点击筛选按钮，可以在控制台展示选择的内容；initialValues属性的值为一个对象，在此设置初次渲染时的默认选项。Form下Form.Item标签中设置label和name的值，以及该标签下，设置五个Radio，单选框选项，initialValues的值设置为与全部单选框的value属性相同的值。
+    * 4. 频道：Form.Item下添加Select标签，给Select标签添加placeholder属性值、initialValues属性值，其值为luke、style样式。并又在Select下添加Option选项，给两个Option添加value属性，属性值为luke和artem。
+    * 5. 日期：事先从引入的DatePicker中解构赋值出RangePicker，用Form.Item将RangePicker包裹起来。
+    * 6. 筛选：用Form.Item包裹Button，Button的type类型为primary。
