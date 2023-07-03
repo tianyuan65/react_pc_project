@@ -23,10 +23,8 @@ function userReducer(preState=initState,action) {
 
             // 3. return data in reducer for share 
             // 返回并共享从Layout组件中传递的数据
-            return {
-                ...preState,
-                data
-            }
+            return  data
+          
             // return 'hhhhhh'
 
         default:

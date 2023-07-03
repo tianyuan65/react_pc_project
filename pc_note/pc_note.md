@@ -246,34 +246,40 @@
         * 实现该功能执行的代码顺序为此，1. 创建userAction对象->2. 将带有type属性和data属性的对象dispatch给store->store将preState打包给userReducer进行处理，也就是进入switch判断中->3. 若条件符合判断条件，则在判断内部对服务器(http://geek.itheima.net/v1_0user/profile)，发送get请求，从服务器中获取想要的用户的所有数据(这部分具体运行过程详细看3.4.2，就是怎么发送请求，得到成功响应后怎么处理数据)->4. 成功获取数据userName后，暴露该结果，store/index.js引入，统一暴露，以便于在组件中提取使用->5. 组件(Layout)当中，调用useEffect hook，在其回调函数内部执行，从props中解构赋值出的userAction()，若没有进行解构赋值的步骤的话，需写成props.userAction()，值得注意的是，useEffect hook接收两个参数，第二个参数为数组，可传递空数组作为依赖项，也可指定特定的依赖项，以防止避免无限循环更新和"Maximum update depth exceeded"错误的发生(我就发生了，问了chatgbt才恢复正常的)，在此我是将特定的依赖项作为参数传递的。最后在需要用到用户数据的位置，也就是页面头部的右侧中使用{userInfo.data.name}来展示用户名
     * 5. 正常应该是按照上面的步骤逐步进行，但我行不通，所以需要想另外的方法。我现在能展示了，但是不能刷新
         * 5.1 在Layout组件的useEffect方法的回调中，创建一个异步向服务器发送请求的函数，将其命名为getUserInfo，此函数中使用await/async方法向服务器发送get请求，获取成功的响应后，将其结果赋值给变量response。打印response之后会发现，其结果是一个对象，我需要的是此对象的data属性的data属性中的某个属性的值(name属性)的值，所以设置变量userInfo，并将response.data.data赋值给userInfo。
-        * 5.2 在getUserInfo函数内执行操作方法userAction()，并将存有用户数据的变量userInfo作为参数传递进去，以此实现将获取到的用户数据结果发送到redux中。
-        * 5.3 发送用户数据结果到redux中后，在redux/reducers/user.js中将获取到的结果原原本本地返回并共享。
-            * ```
-                case USER:
-                    console.log('成功进入switch判断');
-                    // 3. return data in reducer for share 
-                    // 返回并共享从Layout组件中传递的数据
-                    return {
-                        ...preState,
-                        data
-                    }
-              ```
-        * 5.4 回到Layout组件在展示用户数据的位置用{userInfo.data.xxx}的方式，使用从redux共享的数据即可。
+        * 5.2 在getUserInfo函数内执行操作方法userAction()，并将存有用户数据的变量userInfo作为参数传递进去，以此实现将获取到的用户数据结果发送到redux中。发送get请求的方法有两种，async/await和调用then()
             * ```
                 useEffect(
                     ()=>{
                     // 1. send get  result
                     // 在useEffect中发送get请求
                     const getUserInfo=async ()=>{
-                        const response=await http.get('http://geek.itheima.net/v1_0/user/profile')
+                        // 发送get请求方法1：
+                        http.get('http://geek.itheima.net/v1_0/user/profile').then(response=>{
                         const userInfo=response.data.data
+                        console.log('newUserInfo',userInfo);
                         // 2. result send to redux
                         // 执行操作方法，并需要传入存有用户数据的变量作为参数
                         userAction(userInfo)
+                    })
+                    // 发送get请求方法2：
+                    // const response=await http.get('http://geek.itheima.net/v1_0/user/profile')
+                    // const userInfo=response.data.data
+                    // // 2. result send to redux
+                    // // 执行操作方法，并需要传入存有用户数据的变量作为参数
+                    // userAction(userInfo)
                     }
                     getUserInfo()
                     },[userAction])
               ```
+        * 5.3 发送用户数据结果到redux中后，在redux/reducers/user.js中将获取到的结果原原本本地返回并共享，不需要返回preState，因为之前返回了preState，才导致不能刷新页面。
+            * ```
+                case USER:
+                    console.log('成功进入switch判断');
+                    // 3. return data in reducer for share 
+                    // 返回并共享从Layout组件中传递的数据
+                    return data
+              ```
+        * 5.4 回到Layout组件在展示用户数据的位置用{userInfo.data.xxx}的方式，使用从redux共享的数据即可。
 * 3.5. 退出登录实现
     * 目标：能够实现退出登录功能
     * 1. 为气泡确认框添加确认回调事件
@@ -322,3 +328,10 @@
     * 4. 频道：Form.Item下添加Select标签，给Select标签添加placeholder属性值、initialValues属性值，其值为luke、style样式。并又在Select下添加Option选项，给两个Option添加value属性，属性值为luke和artem。
     * 5. 日期：事先从引入的DatePicker中解构赋值出RangePicker，用Form.Item将RangePicker包裹起来。
     * 6. 筛选：用Form.Item包裹Button，Button的type类型为primary。
+* 4.2 表格区域结构
+    * 目标：能够基于Table组件搭建表格结构
+    * 重点关注：
+        * 1. 通过哪个属性指定Table组件的列信息
+        * 2. 通过哪个属性指定Table数据
+        * 3. 通过哪个属性指定Table列表用到的key属性
+    * 1. 
