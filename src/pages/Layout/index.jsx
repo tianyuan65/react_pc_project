@@ -88,27 +88,38 @@ function GeekLayout(props) {
   // 2. result send to redux
   // 3. return data in reducer for share 
   // 4. in component use shared data
+
+
+  // mount component complete means component built
+  // mapping redux and component's props
   useEffect(
     // 回调
     ()=>{
       // 1. send get  result
       // 在useEffect中发送get请求
       const getUserInfo=async ()=>{
-        const response=await http.get('http://geek.itheima.net/v1_0/user/profile')
-        console.log('res',response);
-        const userInfo=response.data.data
-        console.log('newUserInfo',userInfo);
-        // 2. result send to redux
-        // 执行操作方法，并需要传入存有用户数据的变量作为参数
-        userAction(userInfo)
+        // 发送get请求方法1：
+        http.get('http://geek.itheima.net/v1_0/user/profile').then(response=>{
+          const userInfo=response.data.data
+          console.log('newUserInfo',userInfo);
+          // 2. result send to redux
+          // 执行操作方法，并需要传入存有用户数据的变量作为参数
+          userAction(userInfo)
+       })
+      // 发送get请求方法2：
+      // const response=await http.get('http://geek.itheima.net/v1_0/user/profile')
+      // const userInfo=response.data.data
+      // // 2. result send to redux
+      // // 执行操作方法，并需要传入存有用户数据的变量作为参数
+      // userAction(userInfo)
       }
       getUserInfo()
       // userAction variable
       // userAction()
     },[userAction])
 
-  const {userInfo}=props
-  console.log('userInfo:',userInfo);
+  // const {userInfo}=props
+  // console.log('userInfo:',userInfo);
   // 确认退出
   const onLogout=()=>{
     // 退出登录，要删除token，跳回到登录界面
@@ -130,7 +141,7 @@ function GeekLayout(props) {
           <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']} items={items1} />
           <div className="user-info">
             {/* 4. in component use shared data */}
-            <span className="user-name">{userInfo.data.name}</span>
+            <span className="user-name">{props.userInfo.name}</span>
             <span className="user-logout">
               <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消" onConfirm={onLogout}>
                 <LogoutOutlined/> 退出
