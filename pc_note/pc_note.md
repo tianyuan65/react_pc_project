@@ -423,3 +423,11 @@
     * 1. 给删除文章按钮绑定单击事件deleteArticle
     * 2. 弹出确认窗口，询问用户是否确定删除文章。用Popconfirm标签包裹Button标签，并将上一步绑定在Button标签事件的函数deleteArticle，绑定在Popconfirm标签的onConfirm事件上。
     * 3. 拿到参数调用删除接口，更新列表。在deleteArticle回调中传递参数data，在函数体内向服务器发送异步delete请求，请求删除点击的文章，并调用setParams方法，向该方法传递参数，参数是由...params和当前所在页组成的对象，实现更新列表的操作。
+* 4.8 编辑文章跳转
+    * 目标：能够实现编辑文章跳转功能
+    * 给表示编辑的Button的单击事件绑定goPublishId函数，给函数传递参数data，在函数体内部，调用实现引入的useNavigate hook，复制的navigate函数，给navigate函数传递要跳转的路由地址作为参数
+        * ```
+            const goPublishId=data=>{
+                navigate(`publish/id=${data.id}`,{replace:false})
+            }
+          ```

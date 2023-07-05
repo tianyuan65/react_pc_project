@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link,useNavigate } from "react-router-dom"
 import { Card,Breadcrumb, Form, Button, Radio, DatePicker, Select,Table,Space,Tag,Popconfirm } from "antd"
 import {EditOutlined,DeleteOutlined} from '@ant-design/icons'
 import img404 from '../../assets/error.png'
@@ -9,6 +9,7 @@ import { http } from "../../utils"
 const { Option } = Select
 const { RangePicker } = DatePicker
 export default function Article() {
+  const navigate=useNavigate()
   // 引入useState，原状态，更新状态的方法  channel要以数组的形式参与遍历，所以在useState hook中传递空数组作为参数
   const [channel,setChannel]=useState([])
   // 在useEffect的回调中获取数据
@@ -66,7 +67,11 @@ export default function Article() {
       render: data => {
         return (
           <Space size="middle">
-            <Button type="primary" shape="circle" icon={<EditOutlined />} />
+            <Button 
+              type="primary" 
+              shape="circle" 
+              icon={<EditOutlined />} 
+              onClick={()=>goPublishId(data)}/>
             {/* 点击按钮后，弹出确认提示框，询问是否确认删除文章 */}
             <Popconfirm 
               title="是否确认删除该篇文章？" 
@@ -148,11 +153,18 @@ export default function Article() {
     // console.log('delete',data);
     // 发送delete请求
     await http.delete(`http://geek.itheima.net/v1_0/mp/articles/${data.id}`)
-    // 
+    // 刷新列表
     setParams({
+      // 保留删除前其他文章的参数
       ...params,
+      // 默认在第一页
       page:1
     })
+  }
+
+  // 编辑文章跳转
+  const goPublishId=data=>{
+    navigate(`publish/id=${data.id}`,{replace:false})
   }
   return (
     <div>
