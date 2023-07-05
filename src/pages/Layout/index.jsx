@@ -78,11 +78,6 @@ function GeekLayout(props) {
   // this.props.userAction <=> action userAction 
   // call action() -> store.dispatch(action) -> reducer.switch -> case user -> get(user/profile)
   //                                                                store <- user.mobile(share)
-  
-  // const getUserInfo=async ()=>await http.get('http://geek.itheima.net/v1_0/user/profile').then(res=>{
-  //   // console.log('res:',res);  
-  //   return res=res.data.data
-  // })
 
   // 1. send get  result
   // 2. result send to redux
@@ -97,7 +92,7 @@ function GeekLayout(props) {
     ()=>{
       // 1. send get  result
       // 在useEffect中发送get请求
-      const getUserInfo=async ()=>{
+      const getUserInfo= ()=>{
         // 发送get请求方法1：
         http.get('http://geek.itheima.net/v1_0/user/profile').then(response=>{
           const userInfo=response.data.data
@@ -105,13 +100,13 @@ function GeekLayout(props) {
           // 2. result send to redux
           // 执行操作方法，并需要传入存有用户数据的变量作为参数
           userAction(userInfo)
-       })
-      // 发送get请求方法2：
-      // const response=await http.get('http://geek.itheima.net/v1_0/user/profile')
-      // const userInfo=response.data.data
-      // // 2. result send to redux
-      // // 执行操作方法，并需要传入存有用户数据的变量作为参数
-      // userAction(userInfo)
+        })
+        // 发送get请求方法2：要使用async/await的话需要给getUserInfo添加async，表示是异步调用该函数
+        // const response=await http.get('http://geek.itheima.net/v1_0/user/profile')
+        // const userInfo=response.data.data
+        // // 2. result send to redux
+        // // 执行操作方法，并需要传入存有用户数据的变量作为参数
+        // userAction(userInfo)
       }
       getUserInfo()
       // userAction variable
@@ -124,7 +119,6 @@ function GeekLayout(props) {
   const onLogout=()=>{
     // 退出登录，要删除token，跳回到登录界面
     // 删除token不需要使用redux共享数据，直接在确认退出的函数里调用删除token的函数即可
-    // logoutAction()
     clearToken()
     navigate('/login',{replace:false})
   }

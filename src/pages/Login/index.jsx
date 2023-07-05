@@ -8,15 +8,12 @@ import { loginAction } from '../../redux/actions/login'
 // 引入withRouter函数
 import { withRouter } from '../../utils/withRouter'
 
-// console.log(this);  //undefined
-// console.log('@@');
 class Login extends Component{
   formRef = React.createRef()
 
   // From组件中需要传递的两个函数，意味着，表单提交后，数据验证成功和失败后需要执行的回调函数
-  onFinish=async value=>{
+  onFinish= value=>{
     console.log('Success',value);
-
     // mobx方法，redux没法用，不删，当做错误示例
     // const {username,password}=value
     // try {
@@ -56,14 +53,6 @@ class Login extends Component{
     }
   }
   
-  // loginAsync=()=>{
-  //   const mobile=this.formRef.current.getFieldValue("username")
-  //   const code=this.formRef.current.getFieldValue("password")
-  //   const userObj={mobile,code}
-  //   const userData=this.props.loginAsync(userObj,0)
-  //   console.log(userData);
-  // }
-
   render(){
     return (
       <div className="login">
@@ -85,8 +74,8 @@ class Login extends Component{
             initialValues={{
                 remember: true,
             }}
-            onFinish={this.onFinish()}
-            onFinishFailed={this.onFinishFailed()}
+            onFinish={this.onFinish}
+            onFinishFailed={this.onFinishFailed}
             autoComplete="off"
             validateTrigger={["onChange"]}
             ref={this.formRef}
@@ -136,8 +125,12 @@ class Login extends Component{
                 span: 16,
               }}
             >
-              <Button type="primary" htmltype="submit" 
-                onClick={this.loginAction}
+              {/*  click loginAction function call
+                   loginAction() 
+              
+              */}
+              <Button type="primary" htmltype="submit" block
+                 onClick={this.loginAction}
               >
                 Submit
               </Button>
