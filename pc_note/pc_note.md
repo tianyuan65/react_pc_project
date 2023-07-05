@@ -431,3 +431,13 @@
                 navigate(`publish/id=${data.id}`,{replace:false})
             }
           ```
+
+## 五、发布文章
+* 5.1 基本结构搭建
+    * 目标：能够搭建发布文章页面的基本框架
+    * 使用Card、Form组件搭建页面的基本框架。与内容管理的框架大致相同，需要调整Form组件内部的每一个Form.Item的内容。粗略分为两个部分，头部和Form组件；细分五个部分，头部、标题部分、频道部分、封面部分和发布文章
+        * 1. 头部：显示当前所在路由地址的导航名称
+        * 2. 标题：Input标签，需要输入文章的标题
+        * 3. 频道：用Select包裹的Option，用于选择频道，目前只有一个就是"推荐"
+        * 4. 封面：由两个小部分组成，由Radio.Group包裹的三个Radio单选框标签，Radio.Group又用Form.Item包裹；由Upload标签包裹的PlusOutlined图标组件，用于上传本地图片
+        * 5. 发布文章：Space包裹的Button，点击按钮发布文章

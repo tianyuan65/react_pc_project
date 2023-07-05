@@ -164,7 +164,7 @@ export default function Article() {
 
   // 编辑文章跳转
   const goPublishId=data=>{
-    navigate(`publish/id=${data.id}`,{replace:false})
+    navigate(`/layout/publish/id=${data.id}`,{replace:false})
   }
   return (
     <div>
