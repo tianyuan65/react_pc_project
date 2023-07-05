@@ -331,7 +331,95 @@
 * 4.2 表格区域结构
     * 目标：能够基于Table组件搭建表格结构
     * 重点关注：
-        * 1. 通过哪个属性指定Table组件的列信息
-        * 2. 通过哪个属性指定Table数据
-        * 3. 通过哪个属性指定Table列表用到的key属性
-    * 1. 
+        * 1. 通过哪个属性指定Table组件的列信息  columns
+        * 2. 通过哪个属性指定Table数据  dataSource
+        * 3. 通过哪个属性指定Table列表用到的key属性  rowKey
+    * 1. 与筛选区域同一级别使用Card标签将Table标签包裹起来，给Table标签属性，columns和dataSource添加属性值columns和data，这两个属性值类型都是数组，以便于后续使用map()进行遍历后，展示在页面上。rowKey属性会在后续使用map()方法对数组进行遍历时作为key属性而存在，不写会报错
+    * 2. 在表格区域结构的代码中，columns数组中的几个对象都有render属性，这里的render不只是一个对象的属性那么简单，这里render是函数，在函数中返回的数据，并展示包含图片，状态内容，按钮等内容。
+* 4.3 渲染频道数据
+    * 目标：使用接口数据渲染频道列表
+    * 1. 使用axios，向服务器发送get请求来获取数据
+        * 1.1 实现引入useState hook，将数据和更新数据(channel,setChannel)的方法放在数据里，获取到的数据最后需要以数据的形式参与遍历，所以给useState hook传入空数组作为参数。
+        * 1.2 引入useEffect hook，并在这个hook的回调中，创建异步函数getChannel，在该函数中向服务器发送get请求，将结果赋值给变量response。随后调用setChannel方法，将从服务器获取的结果的data属性的data属性的channels作为参数传入。
+    * 2. 将使用频道数据列表改写为下拉框组件
+        * 2.1 在筛选区域的频道部分，对刚获取的channel(数组形式)进行遍历，传参channelItem，将Option标签传入参数为channelItem的回调中，给Option标签添加key属性，其值为channelItem.id(就是0,1,2,3...)，将value属性的值改为和key属性同样，最后Option的文本内容改为channel遍历后，channel的name
+* 4.4 渲染表格数据
+    * 目标：使用接口数据渲染表格数据
+    * 1. 声明列表相关数据管理，就是涌入useState hook，设置要更新的数据的变量名和更新数据方法的变量名后，将存放数据的数组位置和count的值打包成对象，传递到useState方法的参数位置
+        * ```
+            const [article,setArticle]=useState({
+                list:[],
+                count:0
+            })
+          ```
+    * 2. 声明参数相关数据管理，就是初始化每一篇文章内容(对象)里的条数(参数)
+        * ```
+            const [params,setParams]=useState({
+                page:1,
+                perPage:10
+            })
+          ```
+    * 3. 调用接口获取数据，引入useEffect hook，并在其回调内创建函数，在函数内向服务器发送get请求，更新数据
+        * ```
+            useEffect(()=>{
+                const getArticleList=async ()=>{
+                // 发送请求
+                const response=await http.get('http://geek.itheima.net/v1_0/mp/articles',{params})
+                const articleList=response.data.data
+                const {results,total_count}=articleList
+                setArticle({list:results,count:total_count})
+                }
+                getArticleList()
+            },[params])
+          ```
+    * 4. 使用接口数据渲染模板，找到文章列表区域，使用从服务器获取到的数据，渲染页面
+        * ```
+            <Card title={`根据筛选条件共查询到${article.count}条结果:`}>
+                <Table rowKey="id" 
+                columns={columns} 
+                dataSource={article.list}/>
+            </Card>
+          ```
+* 4.5 实现筛选功能
+    * 目标：能够根据筛选条件筛选表格数据
+    * 1. 为表单添加onFinish属性监听表单提交事件，获取参数，给表单的onFinish事件绑定回调函数onFinish
+    * 2. 根据接口字段格式要求格式化参数格式，在onFinish函数中，会进行两次对筛选数据的判断以及一次数据更新，从参数value中解构赋值出status、channel_id、date，并创建一个新的变量newParams，赋值一个空的对象，下面的一系列操作就是想=向newParams添加属性的操作
+        * ```
+            const {status,channel_id,date}=value
+            // 格式化表单数据，就是创建一个叫newParams的变量，其值为一个空对象，下面的一系列操作就是想=向newParams添加属性的操作
+            const newParams={}
+            // 格式化status，就是把在上面设置的param，其值为{page:1,perPage:10}，这个对象赋值给newParams的status
+            newParams.status=status
+            // 判断channel是否channel_id是否被选择
+            if (channel_id) {
+            // 被选，则在作为参数添加进去；没被选，则不作为新参数添加进去
+            newParams.channel_id=channel_id
+            }
+            // 判断起终事件是否被选
+            if (date) {
+            // 被选，则作为新参数添加，并重新设置日期展示格式；不被选，不添加
+            newParams.begin_punddate=date[0].format('YYYY-MM-DD')
+            newParams.end_punddate=date[1].format('YYYY-MM-DD')
+            }
+          ```
+    * 3. 修改params触发接口的重新发送，调用setParams方法，将之前的params(page:1,perPage:10)保留，添加新的newParams。
+        * ```
+            setParams({
+                ...params,
+                ...newParams
+                })
+          ```
+        * **注：不加...params，会把原先的参数覆盖掉；更新newParams时，不是...newParams，这种书写方式，添加是成功添加了，但是不好看；...newParams书写方式，成功添加，没有覆盖掉原先参数**
+            * ![不加...params的结果](images/%E8%A6%86%E7%9B%96.PNG)
+            * ![newParams书写格式为newParams的结果](images/%E4%B9%A6%E5%86%99%E6%A0%BC%E5%BC%8F%E4%B8%BAnewParams%E6%97%B6.PNG)
+            * ![正确书写格式后的结果](images/%E6%AD%A3%E7%A1%AE%E4%B9%A6%E5%86%99%E6%A0%BC%E5%BC%8F%E5%90%8E%E7%9A%84%E7%BB%93%E6%9E%9C.PNG)
+* 4.6 实现分页功能
+    * 目标：能够实现分页获取文章列表数据
+    * 1. 为Table组件/标签指定pagination属性来展示分页效果。Table有一个属性叫pagination，此属性的值为一个对象，在此可以指定当前所在页、在每一页展示数据的数量。在pagination属性中还可以给它的onChange事件绑定回调函数pageChange
+    * 2. 在分页切换事件中获取到筛选表单中选中的数据
+    * 3. 使用当前页数据修改params参数依赖引起接口重新调用获取最新数据，在pageChange函数中调用setParams方法，传递由之前的params和当前页组成的对象作为参数，进行更新
+* 4.7 删除功能
+    * 目标：能够实现点击删除按钮弹框确认
+    * 1. 给删除文章按钮绑定单击事件deleteArticle
+    * 2. 弹出确认窗口，询问用户是否确定删除文章。用Popconfirm标签包裹Button标签，并将上一步绑定在Button标签事件的函数deleteArticle，绑定在Popconfirm标签的onConfirm事件上。
+    * 3. 拿到参数调用删除接口，更新列表。在deleteArticle回调中传递参数data，在函数体内向服务器发送异步delete请求，请求删除点击的文章，并调用setParams方法，向该方法传递参数，参数是由...params和当前所在页组成的对象，实现更新列表的操作。
