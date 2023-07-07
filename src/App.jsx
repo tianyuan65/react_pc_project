@@ -28,8 +28,6 @@ function App() {
           /layout/layout/home
           /layout/home
           */}
-          
-
           <Route path='home' element={<Home />}/>
           <Route path='article' element={<Article/>}/>
           <Route path='publish' element={<Publish/>}/>

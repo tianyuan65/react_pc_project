@@ -441,3 +441,81 @@
         * 3. 频道：用Select包裹的Option，用于选择频道，目前只有一个就是"推荐"
         * 4. 封面：由两个小部分组成，由Radio.Group包裹的三个Radio单选框标签，Radio.Group又用Form.Item包裹；由Upload标签包裹的PlusOutlined图标组件，用于上传本地图片
         * 5. 发布文章：Space包裹的Button，点击按钮发布文章
+* 5.2 富文本编辑器
+    * 目标：能够安装并初始化富文本编辑器
+    * 1. 安装富文本编辑器：npm i react-quill@2.0.0-beta.2 
+        * 富文本编辑器在GitHub上的官方文档：https://github.com/zenoamaro/react-quill#with-webpack-or-create-react-app
+    * 2. 导入富文本编辑器组件以及样式文件
+        * ```
+            import ReactQuill from 'react-quill';
+            import 'react-quill/dist/quill.snow.css';
+          ```
+    * 3. 渲染富文本编辑器组件。此Form.Item的rules属性的属性值(表单校验)必须用中括号包起来，否则会报"rules.some is not a function"这样的错
+        * ```
+            {/* 输入文章内容 */}
+            <Form.Item 
+                label="内容"
+                name="content"
+                // 该对象必须是以数组形式，否则报错
+                rules={[{required:true,message:'请输入文章内容'}]}
+                >
+                <ReactQuill theme="snow" />
+            </Form.Item>
+          ```
+    * 4. 通过Form组件的initialValues，为富文本编辑器设置初始值，否则会报错。Form组件的initialValues属性的值就是一个对象，原先就有一个type属性，且值为1，给该对象再添加一个属性content，content的值为'Enter content here'，刷新页面后就可以在输入内容的区域看到content的值
+    * 5. 调整富文本编辑器的样式
+* 5.3 频道数据获取
+    * 目标：实现频道数据的获取和渲染
+    * 1. 使用useState设置存数据的变量名channel和更新数据setChannel的方法。
+    * 2. 在useEffect hook中调用接口并保存数据。在useEffect hook的回调中，向服务器发送异步get请求，获取数据后，调用setChannel方法，将数据作为参数传递进去，进行数据更新
+    * 3. 使用数据渲染对应模块。找到频道的Form.Item，在此标签内部对获取到的频道数据进行遍历，以便于渲染到页面中
+* 5.4 实现上传封面
+    * 目标：能够上传图片
+    * 1. 为Upload组件添加action属性，指定封面图片上传接口地址，接口地址为，"http://geek.itheima.net/v1_0/upload"
+    * 2. 创建状态fileList存储已上传封面图片地址，并设置为Upload组件的fileList属性值
+    * 3. 为Upload添加onChange属性，监听封面图片上传、删除等操作，给onChange事件绑定uploadChange函数
+    * 4. 在uploadChange函数中拿到当前图片数据fileData，并存储到状态fileList中。图片上传是一个过程，在此过程中可以看到进度，老师可以打log看到，我看不到，所以我debug了，在setFileList打断点后，进行上传图片的操作，可以在作用域的位置看到图片数据的信息、上传进度、上传情况等
+* 5.5 切换图片Type
+    * 目标：实现点击切换图片类型
+    * 1. 使用useState hook，创建状态imgCount和更新状态的方法setImgCount，并给useState传参数值1，意为imgCount的默认初始值为1
+    * 2. 给Radio.Group添加onChange监听单图、三图、无图的切换事件。查看Radio组件可得知它有value属性，且为三个不同的Radio组件的value属性设置了值(1,3,0)，分别对应单图、三图、无图。的值这些后给onChange事件绑定函数typeChange
+    * 3. 在切换事件中修改imgCount值。调用typeChange回调函数，传参e，在函数内获取表示Radio的value值的数据，赋值给变量count，最后在函数内调用setImgCount方法，更新数据
+    * 4. 只在imgCount不为0时展示Upload组件。给Upload组件的外面包一个判断，当imgCount的值大于0时，才渲染Upload组件，等于0时不展示。
+        * ```
+            {imgCount>0 && (
+              <Upload 
+                name="image" 
+                listType="picture-card" 
+                className="avatar-uploader" 
+                showUploadList
+                action="http://geek.itheima.net/v1_0/upload"
+                fileList={fileList}
+                onChange={uploadChange}
+              />
+            )}
+          ```
+* 5.6 控制最大上传数量
+    * 目标：控制Upload组件的最大上传数量和是否支持多张图片
+    * 1. 修改Upload组件的maxCount(最大数量)属性，控制最大上传数量。给Upload组件添加maxCount属性，其值设置为ImgCount。
+    * 2. 控制multiple(支持多图选择)属性，控制是否支持选择多张图片。在antd官方组件库里可以搜到multiple属性，该属性的默认是为false，意为不支持多图，向Upload组件添加该属性后，将其值设置为imgCount>1。选择多图单选框后，上传图片时，按住ctrl，拖拽想要上传的图片们的话，就可以批量上传；点了单图就不可以批量上传图片了，只能一个一个来。
+* 5.7 实现暂存图片列表
+    * 目标：能够实现暂存已经上传的图片列表，能够在切换图片类型的时候完成切换
+    * 问题描述：如果当前为三图模式，且已上传图片，选择单图只显示一张，再切换回三图，继续显示三张，该如何实现？
+    * 思路：在上传完毕之后通过ref存储所有图片，需要几张就显示几张，其实也就是把ref当仓库，用多少拿多少
+    * 1. 通过useRef hook创建一个暂存仓库。在上传完毕图片的时候把图片列表以数组的形式存入，并在上传图片的回调uploadChange的最后，向仓库存入上传的图片
+    * 2. 如果是单图模式，就从仓库里取第一张图，以数组的形式存入fileList。设置if判断，若只展示一张图片，就展示当初选中上传的第一张，图片不存在，则返回一个空数组，并不展示图片
+        * ```
+            if (count===1) {
+                // 单图，只展示一张图片
+                const firstImg=fileListRef.current[0]
+                // 更新数据，若没有第一张图片，则返回一个空数组，并不展示；否则展示图片
+                setFileList(firstImg ? [firstImg] : [])
+            }
+          ```
+    * 3. 如果是三图模式，就把仓库里所有的图片，以数组的形式存入fileList。代码续上一个if判断
+        * ```
+            else if (count===3) {
+                // 三图，展示所有选中的图片
+                setFileList(fileListRef.current)
+            }
+          ```
