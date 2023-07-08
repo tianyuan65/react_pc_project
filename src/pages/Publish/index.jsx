@@ -68,6 +68,26 @@ export default function Publish() {
       setFileList(fileListRef.current)
     }
   }
+
+  // 提交表单
+  const onFinish= async value=>{
+    console.log('submitForm',value);
+    // 从value当中解构赋值出需要的信息
+    const {channel_id,content,type,title}=value
+    // 创建变量params，向表单内添加需要存入的数据的属性名
+    const params={
+      channel_id,
+      content,
+      title,
+      type,
+      cover:{
+        type:type,
+        // 将存到fileList的图片数据进行遍历，获取图片的路由地址，并将该值赋值给images
+        images:fileList.map(item=>item.url)
+      }
+    }
+    await http.post('http://geek.itheima.net/v1_0/mp/articles?draft=false',params)
+  }
   return (
     <div className="publish">
       <Card
@@ -85,6 +105,7 @@ export default function Publish() {
           initialValues ={{type:1,content:'Enter content here'}} 
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 16 }}
+          onFinish={onFinish}
         >
           {/* 标题部分 */}
           <Form.Item label="标题" name="title">

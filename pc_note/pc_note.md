@@ -519,3 +519,41 @@
                 setFileList(fileListRef.current)
             }
           ```
+* 5.8 实现发布文章
+    * 目标：能够在表单提交是组装表单数据，并调用接口发布文章
+    * 1. 给Form表单添加onFinish，用来获取表单提交数据。
+    * 2. 在事件处理程序中，拿到表单数据，按照接口需要格式化数据。调用绑定在onFinish事件上的onFinish回调函数，并传参，在函数内打印该参数就会打印出表单内所有的数据。但是唯独没有图片的信息，所以在onFinish函数中需要对表单数据进行格式化，将图片的信息也添加进去。最后向服务器发送post请求，也将params作为参数传进去，在Article组件查看就会发现，刚刚选择的数据添加到了展示文章的区域当中。
+        * ```
+            // 提交表单
+            const onFinish= async value=>{
+                console.log('submitForm',value);
+                // 从value当中解构赋值出需要的信息
+                const {channel_id,content,type,title}=value
+                // 创建变量params，向表单内添加需要存入的数据的属性名
+                const params={
+                channel_id,
+                content,
+                title,
+                type,
+                cover:{
+                    type:type,
+                    // 将存到fileList的图片数据进行遍历，获取图片的路由地址，并将该值赋值给images
+                    images:fileList.map(item=>item.url)
+                }
+                }
+                await http.post('http://geek.itheima.net/v1_0/mp/articles?draft=false',params)
+            }
+          ```
+    * 3. 调用接口实现文章发布，其中的接口数据格式为：
+        * ```
+            {
+                channel_id: 1
+                content: "<p>测试</p>"
+                cover: {
+                    type: 1, 
+                    images: ["http://geek.itheima.net/uploads/1647066600515.png"]
+                },
+                type: 1
+                title: "测试文章"
+            }
+          ```
