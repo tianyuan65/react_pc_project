@@ -557,3 +557,34 @@
                 title: "测试文章"
             }
           ```
+* 5.9 编辑文章-文案适配
+    * 目标：能够在编辑文章时展示数据
+    * 1. 通过路由参数获取文章id。引入useSearchParams hook，调用该钩子函数，赋值给[params]，此时params调用get方法，来获取文章的id。
+    * 2. 根据文章id是否存在判断是否为编辑状态。若不是编辑状态，展示发布时的文案信息
+    * 3. 如果是编辑状态，展示编辑时的文案信息
+        * ```
+            const [params]=useSearchParams()
+            const articleId=params.get('id')
+            ...
+            <Breadcrumb.Item>{articleId ? '编辑':'发布'}文章</Breadcrumb.Item>
+            <Button type="primary" htmlType="submit">{articleId ? '编辑':'发布'}文章</Button>
+          ```
+* 5.10 编辑文章-数据获取/回填
+    * 目标：使用articleId获取文章详情，判断文章id是否存在，若存在就根据articleI获取文章详情数据，需实现的功能如下：
+    * 1. 表单回填
+    * 2. 暂存列表
+    * 3. 回填Upload组件的fileList
+    * 表单回填怎么实现？
+        * 1. 调用useEffect hook，在useEffect的回调函数中的异步函数getArticle中，向服务器/接口发送get请求，依赖项为articleId
+        * 2. 并创建一个if判断，判断条件为articleId是否存在，若存在，才调用getArticle函数，意为必须是编辑状态，才可以发送请求；若不是编辑状态，就不具有articleID，所以无法展示，会直接跳转到Login组件。
+        * 3. 表单回填：引入并调用useRef hook，创建并赋值给一个变量form，给Form组件添加ref属性，并将其值设置为刚创建的form。查询官网可查看到，在getArticle函数中调用form实例(formInstance)的current对象的setFieldsValue方法，并需要给setFieldsValue方法传递想借口发送请求后得来的结果作为参数，就可以在点击编辑按钮时，展示适配的文案内容
+    * 回显Upload组件的fileList
+        * 图片上传Upload组件的回显依赖的数据格式如下：
+            * ```
+            [
+                { url: 'http://geek.itheima.net/uploads/1647066120170.png' }  
+                ...
+            ]
+              ```
+        * 1. 想要在编辑状态下展示Upload组件，就需要获取当前文章的fileList后遍历fileList，并在调用setFileList方法中，返回遍历后的结果，以这种方式来实现回填Upload组件的fileList功能
+        * 2. 但是在编辑状态下，对图片的单图还是三图展示结果的切换时，出现问题，暂存图片数据的仓库为fileListRef，调用仓库的current属性，将编辑状态的图片数据articleData.cover.images，存到fileListRef.current中。当然这步骤可以将遍历fileList的结果赋值给一个变量，进行简化后，后续可以直接调用该变量，但我没写

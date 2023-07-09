@@ -101,7 +101,7 @@ export default function Article() {
   // 2. 参数管理，就是初始化每一篇文章内容(对象)里的条数(参数)
   const [params,setParams]=useState({
     page:1,
-    per_page:2
+    per_page:10
   })
 
   // 3. 发送请求，以获取数据
@@ -164,7 +164,7 @@ export default function Article() {
 
   // 编辑文章跳转
   const goPublishId=data=>{
-    navigate(`/layout/publish/id=${data.id}`,{replace:false})
+    navigate(`/layout/publish?id=${data.id}`,{replace:false})
   }
   return (
     <div>

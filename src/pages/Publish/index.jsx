@@ -1,5 +1,5 @@
 import { Card,Breadcrumb, Form, Button, Radio, Upload, Select,Space,Input } from "antd"
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { PlusOutlined } from '@ant-design/icons'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -58,6 +58,7 @@ export default function Publish() {
     // 更新数据
     setImgCount(count)
 
+    // 判断是单图还是三图
     if (count===1) {
       // 单图，只展示一张图片
       const firstImg=fileListRef.current[0]
@@ -88,6 +89,40 @@ export default function Publish() {
     }
     await http.post('http://geek.itheima.net/v1_0/mp/articles?draft=false',params)
   }
+
+  // 编辑功能--文案适配
+  const [params]=useSearchParams()
+  const articleId=params.get('id')
+  // console.log('articleId',articleId);
+
+  // 编辑文章--数据获取(数据回填)
+  const form=useRef(null)
+  useEffect(()=>{
+    const getArticle=async ()=>{
+      const response=await http.get(`http://geek.itheima.net/v1_0/mp/articles/${articleId}`)
+      const articleData=response.data.data
+      // 表单数据回填
+      // setFieldsValue方法的参数必须是以对象的形式传入的
+      form.current.setFieldsValue({...articleData,type:articleData.cover.type})
+      // 调用setFileList方法回填Upload组件
+      setFileList(articleData.cover.images.map(item=>{
+        // 返回遍历结果
+        return {url:item}
+      }))
+      // 在暂存列表保存图片数据
+        // 等于号右侧的数据格式不对
+      // fileListRef.current=articleData.cover.images
+        // 将遍历的结果直接保存在暂存库当中(暂存列表和fileList回显列表保持数据结构统一即可)
+      fileListRef.current=articleData.cover.images.map(item=>{
+        return {url:item}
+      })
+    }
+    // articleId存在，即是编辑状态，才调用该函数
+    if (articleId) {
+      getArticle()
+      console.log(form);
+    }
+  },[articleId])
   return (
     <div className="publish">
       <Card
@@ -96,7 +131,7 @@ export default function Publish() {
             <Breadcrumb.Item>
               <Link to="/layout/home">首页</Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>发布文章</Breadcrumb.Item>
+            <Breadcrumb.Item>{articleId ? '编辑':'发布'}文章</Breadcrumb.Item>
           </Breadcrumb>
         }
         style={{ marginBottom: 20 }}
@@ -106,6 +141,7 @@ export default function Publish() {
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 16 }}
           onFinish={onFinish}
+          ref={form}
         >
           {/* 标题部分 */}
           <Form.Item label="标题" name="title">
@@ -168,7 +204,7 @@ export default function Publish() {
           {/* 发布文章内容 */}
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit">发布文章</Button>
+              <Button type="primary" htmlType="submit">{articleId ? '编辑':'发布'}文章</Button>
             </Space>
           </Form.Item>
         </Form>
