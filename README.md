@@ -1,70 +1,22 @@
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 项目介绍
+* 使用React技术搭建脚手架，用户登录后，除了可以查看已发布的所有文章，根据频道筛选想要查看的文章，还可以发布并编辑文章。
+## 项目目标
+* 用户登录后，除了可以查看已发布文章，用户还可以发布文章和编辑用户自己发布的文章
+## 主要内容
+* 1. 登录后，渲染Layout页面，在布局页面的右上侧展示用户的id，并点击左侧导航栏的数据概览选项时，展示引入EChARTS制作的柱状图
+* 2. 在发布文章模块，用户可以实现编辑文章标题、选择频道、上传相关图片、输入文章内容，最后发布文章的操作
+* 3. 在文章管理模块，可以选择对已发布的文章进行编辑，编辑后点击更新文章按钮，实现对已发布文章的编辑功能
+## 用到的技术
+* React
+* react-router-dom
+* antd
+* redux
+* react-quill
+## 总结
+* 1. 使用redux共享用户数据时卡了很久，不用在reducers的switch判断中进行发送请求的操作，在组件中发送请求、接收响应、调用映射的操作方法并将用户数据作为参数传递后，在reducers中将获取的数据原原本本的返回即可。
+## 难点与重点
+* 1. 使用redux共享用户数据，还需要将用户的数据添加到localStorage当中
+* 2. 不需要再reducers函数当中向服务器发送请求、获取成功响应。在组件当中调用useEffect hook后，在该hook的回调函数中，进行发送请求、接收响应的操作，想要共享数据，只需调用映射的操作方法，并向映射的操作方法传递想要共享的数据变量作为参数后，在reducers当中将数据原原本本地返回即可，这样就可以更便捷、清楚地共享用户数据
+## 感受：
+* 1. 需要更扎实地掌握Redux相关的知识，如：如何在reducers的switch循环中向服务器发送异步请求，并接收响应结果
+* 2. 灵活运用antd组件库

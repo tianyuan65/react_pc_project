@@ -1,5 +1,6 @@
 // 添加自定义对于webpack的配置
 const path=require('path')
+// const { whenProd, getPlugin, pluginByName } = require('@craco/craco')
 module.exports = {
     // webpack配置
     webpack:{
@@ -7,6 +8,7 @@ module.exports = {
         alias:{
             // 约定：使用 @ 表示src文件所在路径
             '@':path.resolve(__dirname,'src')
-        }
+        },
     }
+    
 };

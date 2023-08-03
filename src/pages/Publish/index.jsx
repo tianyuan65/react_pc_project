@@ -1,5 +1,5 @@
-import { Card,Breadcrumb, Form, Button, Radio, Upload, Select,Space,Input } from "antd"
-import { Link, useSearchParams } from 'react-router-dom'
+import { Card,Breadcrumb, Form, Button, Radio, Upload, Select,Space,Input,message } from "antd"
+import { Link, useSearchParams,useNavigate } from 'react-router-dom'
 import { PlusOutlined } from '@ant-design/icons'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -39,7 +39,7 @@ export default function Publish() {
           url: file.response.data.url
         }
       }
-      // 否则直接返回遍历的结果
+      // 否则直接返回遍历的结果，不做处理
       return file
     })
     // 更新图片数据
@@ -71,6 +71,7 @@ export default function Publish() {
   }
 
   // 提交表单
+  const navigate=useNavigate()
   const onFinish= async value=>{
     console.log('submitForm',value);
     // 从value当中解构赋值出需要的信息
@@ -87,7 +88,17 @@ export default function Publish() {
         images:fileList.map(item=>item.url)
       }
     }
-    await http.post('http://geek.itheima.net/v1_0/mp/articles?draft=false',params)
+    // 是否是编辑文章
+    if (articleId) {
+      // 是则，更新文章
+      await http.put(`http://geek.itheima.net/v1_0/mp/articles/${articleId}?draft=false`,params)
+    }else{
+      // 否则，发布文章
+      await http.post('http://geek.itheima.net/v1_0/mp/articles?draft=false',params)
+    }
+    // 跳转列表，提示用户
+    navigate('/layout/article')
+    message.success(`${articleId ? '更新成功':'发布成功'}`)
   }
 
   // 编辑功能--文案适配

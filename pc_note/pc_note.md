@@ -496,7 +496,7 @@
           ```
 * 5.6 控制最大上传数量
     * 目标：控制Upload组件的最大上传数量和是否支持多张图片
-    * 1. 修改Upload组件的maxCount(最大数量)属性，控制最大上传数量。给Upload组件添加maxCount属性，其值设置为ImgCount。
+    * 1. 修改Upload组件的maxCount(最大数量)属性，控制最大上传数量。给Upload组件添加maxCount属性，其值设置为imgCount。
     * 2. 控制multiple(支持多图选择)属性，控制是否支持选择多张图片。在antd官方组件库里可以搜到multiple属性，该属性的默认是为false，意为不支持多图，向Upload组件添加该属性后，将其值设置为imgCount>1。选择多图单选框后，上传图片时，按住ctrl，拖拽想要上传的图片们的话，就可以批量上传；点了单图就不可以批量上传图片了，只能一个一个来。
 * 5.7 实现暂存图片列表
     * 目标：能够实现暂存已经上传的图片列表，能够在切换图片类型的时候完成切换
@@ -588,3 +588,106 @@
               ```
         * 1. 想要在编辑状态下展示Upload组件，就需要获取当前文章的fileList后遍历fileList，并在调用setFileList方法中，返回遍历后的结果，以这种方式来实现回填Upload组件的fileList功能
         * 2. 但是在编辑状态下，对图片的单图还是三图展示结果的切换时，出现问题，暂存图片数据的仓库为fileListRef，调用仓库的current属性，将编辑状态的图片数据articleData.cover.images，存到fileListRef.current中。当然这步骤可以将遍历fileList的结果赋值给一个变量，进行简化后，后续可以直接调用该变量，但我没写
+
+## 六、项目打包
+* 6.1 项目打包
+    * 目标：能够通过命令对项目进行打包
+    * 1. 在项目根目录下打开终端，输入打包命令：npm run build
+    * 2. 等待打包完成，打包生成的内容被放在根下的build文件夹中
+* 6.2 项目本地预览
+    * 目标：能够在本地预览打包后的项目
+    * 1. 全局安装本地服务包 npm i -g serve 该包提供了serve命令，用来启动本地服务
+    * 2. 在项目根目录中执行命令 serve -s ./build 在build目录中开启服务器
+    * 3. 在浏览器中访问: http://localhost:3000/ 预览项目
+* 6.3 打包体积分析
+    * 目标：能够分析项目打包体积，分析说明通过分析打包体积，才能知道项目中的哪部分内容体积过大，才能知道如何进行优化
+    * 1. 安装分析打包提及的包：npm i source-map-explorer
+    * 2. 在package.json中的scripts标签中，添加分析打包体积的命令
+    * 3. 打包项目：npm run build(若已经打包过，就省略这一步)
+    * 4. 运行分析命令：npm analyze
+    * 5. 通过浏览器打开的页面，分析图表中的包体积
+    * 核心代码：package.json中
+        * ```
+            "scripts": {
+                "analyze": "source-map-explorer 'build/static/js/*.js'",
+            }
+          ```
+* 6.4 优化-配置CDN
+    * 目标：能够对第三方包使用CDN优化
+    * 分析说明：通过出让从来修改文本pack配置，从阿尔实现CDN优化，但我是真的没必要，加了这些配置甚至无法打包文件
+        * ```
+            // 添加自定义对于webpack的配置
+            const path = require('path')
+            const { whenProd, getPlugin, pluginByName } = require('@craco/craco')
+
+            module.exports = {
+            // webpack 配置
+            webpack: {
+                // 配置别名
+                alias: {
+                // 约定：使用 @ 表示 src 文件所在路径
+                '@': path.resolve(__dirname, 'src')
+                },
+                // 配置webpack
+                // 配置CDN
+                configure: (webpackConfig) => {
+                // webpackConfig自动注入的webpack配置对象
+                // 可以在这个函数中对它进行详细的自定义配置
+                // 只要最后return出去就行
+                let cdn = {
+                    js: [],
+                    css: []
+                }
+                // 只有生产环境才配置
+                whenProd(() => {
+                    // key:需要不参与打包的具体的包
+                    // value: cdn文件中 挂载于全局的变量名称 为了替换之前在开发环境下
+                    // 通过import 导入的 react / react-dom
+                    webpackConfig.externals = {
+                    react: 'React',
+                    'react-dom': 'ReactDOM'
+                    }
+                    // 配置现成的cdn 资源数组 现在是公共为了测试
+                    // 实际开发的时候 用公司自己花钱买的cdn服务器
+                    cdn = {
+                    js: [
+                        'https://cdnjs.cloudflare.com/ajax/libs/react/18.1.0/umd/react.production.min.js',
+                        'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.1.0/umd/react-dom.production.min.js',
+                    ],
+                    css: []
+                    }
+                })
+
+                // 都是为了将来配置 htmlWebpackPlugin插件 将来在public/index.html注入
+                // cdn资源数组时 准备好的一些现成的资源
+                const { isFound, match } = getPlugin(
+                    webpackConfig,
+                    pluginByName('HtmlWebpackPlugin')
+                )
+
+                if (isFound) {
+                    // 找到了HtmlWebpackPlugin的插件
+                    match.userOptions.cdn = cdn
+                }
+
+                return webpackConfig
+                }
+            }
+            }
+          ```
+        * ```
+            <!-- 加载第三发包的 CDN 链接
+            这个代码有可能写到head里，也有可能写道body里，取决于依赖dom完成生成
+            写在这个位置意思是，在root代码执行完毕之后，才执行它；
+            写在head里的意思是，执行root之前执行改代码
+            -->
+            <!-- <% htmlWebpackPlugin.userOptions.cdn.js.forEach(cdnURL => { %>
+            <script src="<%= cdnURL %>"></script>
+            <% }) %> -->
+        ```
+* 6.5 优化-路由懒加载
+    * 目标：能够对路由进行懒加载实现代码分隔
+    * 1. 在App组件中，导入Suspense组件
+    * 2. 在路由Router内部，使用Suspense组件包裹组件内容
+    * 3. 为Suspense组件提供fallback属性，指定loading占位内容
+    * 4. 导入lazy函数，并修改为懒加载方式导入路由组件
