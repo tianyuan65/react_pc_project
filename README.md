@@ -1,3 +1,30 @@
+## Project Introduction
+* Built with React technology, this project allows users to log in and not only view all published articles but also filter articles by channels and publish and edit their own articles.
+## Project Goals
+* After logging in, users can not only view published articles but also publish new articles and edit their own published articles.
+## Main Contents
+* 1. After logging in, the Layout page is rendered, displaying the user's ID on the upper right corner of the layout page. Clicking the Data Overview option in the left navigation bar will display a bar chart created using ECharts.
+In the article publishing module, users can edit the article title, choose a channel, upload related images, input article content, and finally publish the article.
+* 2. In the article management module, users can choose to edit published articles. After editing, clicking the Update Article button will update the published article.
+## Technologies Used
+* React
+* react-router-dom
+* antd (Ant Design)
+* redux
+* react-quill
+## Summary
+* It took a while to share user data using Redux. Instead of sending requests in the reducers' switch statements, the approach is to send requests, receive responses, call mapped action methods with user data as parameters in components, and then return the received data as-is in the reducers.
+## Difficulties and Key Points
+* 1. To share user data using Redux, it is also necessary to add the user's data to localStorage.
+* 2. There is no need to send requests and get successful responses in the reducers' functions. Instead, useEffect hook is used in the components. In the callback function of the hook, sending requests and receiving responses are handled. To share data, call mapped action methods, pass the data variables you want to share as parameters to the mapped action methods, and then simply return the data as-is in the reducers. This makes sharing user data more convenient and clear.
+## Impressions:
+* 1. More solid understanding of Redux-related knowledge is needed, such as how to send asynchronous requests to the server and receive response results within the reducers' switch loops.
+* 2. Agile utilization of the antd component library is essential.
+## Start this project.
+* 1. ![start the project](./pc_note/images/How%20start%20the%20project.PNG)
+* 2. After successful startup, the URL is ```http://localhost:3000```. Please enter ```/login``` after 3000.
+* 3. Please enter the following credentials: Username: 13811111111, Password: 246810. This will allow you to access and display the Layout Component.
+
 ## 项目介绍
 * 使用React技术搭建脚手架，用户登录后，除了可以查看已发布的所有文章，根据频道筛选想要查看的文章，还可以发布并编辑文章。
 ## 项目目标
@@ -20,3 +47,7 @@
 ## 感受：
 * 1. 需要更扎实地掌握Redux相关的知识，如：如何在reducers的switch循环中向服务器发送异步请求，并接收响应结果
 * 2. 灵活运用antd组件库
+## 启动该项目
+* 1. ![start the project](./pc_note/images/How%20start%20the%20project.PNG)
+* 2. 启动成功后，网址为```http://localhost:3000```，请在3000后输入```/login```。
+* 3. 请输入，Username：13811111111，Password：246810，即可展示Layout
